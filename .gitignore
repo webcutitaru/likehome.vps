@@ -1,0 +1,68 @@
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- IDE / local tooling ---
+/.cursor/
+/.idea
+/.vscode
+/.nova
+/.zed
+/.fleet
+/.codex
+/.phpactor.json
+/.phpunit.cache
+.phpunit.result.cache
+.phpstorm.meta.php
+_ide_helper.php
+
+# --- Environment ---
+.env*
+
+# --- Docs & scripts (local only) ---
+/docs/
+/scripts/
+/README.md
+
+# --- Secrets / local config ---
+/auth.json
+/storage/*.key
+Homestead.json
+Homestead.yaml
+
+# --- Dependencies ---
+/node_modules
+/vendor
+
+# --- Laravel runtime ---
+/public/hot
+/public/storage
+/public/build
+/public/fonts-manifest.dev.json
+/storage/pail
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+
+# --- Filament build (regenerate: composer install) ---
+/public/js/filament/
+/public/css/filament/
+/public/fonts/filament/
+
+# --- Logs ---
+*.log
+
+# --- Uploads ---
+/public/uploads/*
+!/public/uploads/properties/
+/public/uploads/properties/*
+!/public/uploads/properties/.gitkeep
+/storage/app/public/uploads
+
+# --- Tests ---
+/coverage
+
+# --- DB dumps ---
+*.sql
+*.dump
+/database/*.sqlite
+/database/*.sqlite-journal
