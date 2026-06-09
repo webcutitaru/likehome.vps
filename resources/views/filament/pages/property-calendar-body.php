@@ -1,28 +1,51 @@
-<div class="max-w-full flex min-h-0 flex-col">
-    <div class="mb-6 flex shrink-0 flex-col gap-4 sm:gap-4 lg:flex-row lg:items-stretch lg:justify-between">
-        <div class="min-w-0 max-w-2xl">
-            <p class="text-slate-500 max-w-2xl">Vizualizare pe proprietăți: preț pe noapte, rezervări și blocări. Selectează zile libere consecutive pentru un preț special (se salvează în perioadele de preț ale proprietății).</p>
+<?php
+$calFromDispDt = DateTimeImmutable::createFromFormat('Y-m-d', $fromYmd);
+$calFromDisp = $calFromDispDt && $calFromDispDt->format('Y-m-d') === $fromYmd
+    ? $calFromDispDt->format('d.m.Y')
+    : $fromYmd;
+$calPeriodSummary = $calFromDisp . ' · ' . (int) $dayCount . ' zile';
+?>
+<div class="lh-cal-shell max-w-full flex min-h-0 flex-1 flex-col">
+    <div class="lh-cal-intro mb-3 shrink-0">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="min-w-0 flex-1">
+                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight sm:text-2xl">Calendar rezervări și prețuri</h2>
+                <p class="mt-0.5 text-sm text-slate-500">Prețuri pe noapte, rezervări și blocări pe proprietăți</p>
+            </div>
+            <button type="button"
+                id="lhCalOptionsToggle"
+                class="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                aria-expanded="false"
+                aria-controls="lhCalOptionsPanel">
+                <span id="lhCalOptionsToggleLabel"><?php echo htmlspecialchars($calPeriodSummary, ENT_QUOTES, 'UTF-8'); ?></span>
+                <span id="lhCalOptionsToggleIcon" class="text-slate-400" aria-hidden="true">▾</span>
+            </button>
         </div>
-        <div class="flex w-full min-w-0 flex-col gap-0 sm:w-auto lg:shrink-0 lg:pl-2 lg:max-w-md">
-            <form method="get" action="<?php echo htmlspecialchars($calendarPageUrl, ENT_QUOTES, 'UTF-8'); ?>" class="flex flex-wrap items-center gap-2 bg-white px-3 pt-3 pb-2 rounded-t-2xl border border-slate-100 shadow-sm border-b-0">
-                <div class="flex flex-col">
-                    <label class="block text-[9px] uppercase font-bold text-slate-400 tracking-widest mb-0.5">De la</label>
-                    <input type="date" name="from" value="<?php echo htmlspecialchars($fromYmd, ENT_QUOTES, 'UTF-8'); ?>" class="border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold">
+        <div id="lhCalOptionsPanel" class="hidden mt-4 flex flex-col gap-4 lg:flex-row lg:items-stretch lg:gap-5">
+            <div class="flex min-w-0 flex-1 flex-col justify-center lg:pr-1">
+                <p class="text-sm leading-snug text-slate-500">Vizualizare pe proprietăți: preț pe noapte, rezervări și blocări. Selectează zile libere consecutive pentru un preț special (se salvează în perioadele de preț ale proprietății).</p>
+            </div>
+            <div class="flex w-full min-w-0 flex-col gap-0 sm:w-auto lg:w-80 lg:shrink-0">
+                <form method="get" action="<?php echo htmlspecialchars($calendarPageUrl, ENT_QUOTES, 'UTF-8'); ?>" class="flex flex-wrap items-center gap-2 bg-white px-3 pt-3 pb-2 rounded-t-2xl border border-slate-100 shadow-sm border-b-0">
+                    <div class="flex flex-col">
+                        <label class="block text-[9px] uppercase font-bold text-slate-400 tracking-widest mb-0.5">De la</label>
+                        <input type="date" name="from" value="<?php echo htmlspecialchars($fromYmd, ENT_QUOTES, 'UTF-8'); ?>" class="border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="block text-[9px] uppercase font-bold text-slate-400 tracking-widest mb-0.5">Zile</label>
+                        <select name="days" class="border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold">
+                            <?php foreach ([30, 45, 60, 90, 120] as $opt): ?>
+                                <option value="<?php echo $opt; ?>"<?php echo $dayCount === $opt ? ' selected' : ''; ?>><?php echo $opt; ?> zile</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <button type="submit" class="bg-cta text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:brightness-110 self-end">Afișează</button>
+                </form>
+                <div class="flex items-center justify-between gap-1 bg-white px-3 py-2 rounded-b-2xl border border-slate-100 shadow-sm border-t border-slate-100">
+                    <a href="<?php echo htmlspecialchars($calendarPageUrl . '?from=' . $prevFrom . '&days=' . (int) $dayCount, ENT_QUOTES, 'UTF-8'); ?>" class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">← Înapoi</a>
+                    <a href="<?php echo htmlspecialchars($calendarPageUrl . '?from=' . date('Y-m-d') . '&days=' . (int) $dayCount, ENT_QUOTES, 'UTF-8'); ?>" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">Azi</a>
+                    <a href="<?php echo htmlspecialchars($calendarPageUrl . '?from=' . $nextFrom . '&days=' . (int) $dayCount, ENT_QUOTES, 'UTF-8'); ?>" class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">Înainte →</a>
                 </div>
-                <div class="flex flex-col">
-                    <label class="block text-[9px] uppercase font-bold text-slate-400 tracking-widest mb-0.5">Zile</label>
-                    <select name="days" class="border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold">
-                        <?php foreach ([30, 45, 60, 90, 120] as $opt): ?>
-                            <option value="<?php echo $opt; ?>"<?php echo $dayCount === $opt ? ' selected' : ''; ?>><?php echo $opt; ?> zile</option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <button type="submit" class="bg-cta text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:brightness-110 self-end">Afișează</button>
-            </form>
-            <div class="flex items-center justify-between gap-1 bg-white px-3 py-2 rounded-b-2xl border border-slate-100 shadow-sm border-t border-slate-100">
-                <a href="<?php echo htmlspecialchars($calendarPageUrl . '?from=' . $prevFrom . '&days=' . (int) $dayCount, ENT_QUOTES, 'UTF-8'); ?>" class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">← Înapoi</a>
-                <a href="<?php echo htmlspecialchars($calendarPageUrl . '?from=' . date('Y-m-d') . '&days=' . (int) $dayCount, ENT_QUOTES, 'UTF-8'); ?>" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">Azi</a>
-                <a href="<?php echo htmlspecialchars($calendarPageUrl . '?from=' . $nextFrom . '&days=' . (int) $dayCount, ENT_QUOTES, 'UTF-8'); ?>" class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">Înainte →</a>
             </div>
         </div>
     </div>
@@ -36,22 +59,22 @@
 
     <div id="calCalendarRoot" class="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" style="--cal-cell: 44px;">
         <div id="calVertScroll" class="min-h-0 w-full min-w-0 flex-1 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
-            <div class="cal-sticky-header flex w-full min-w-0 items-stretch sticky top-0 z-50 border-b border-slate-200 shadow-sm [isolation:isolate]">
-                <div class="w-64 shrink-0 border-r border-slate-200 flex flex-col justify-end p-2 h-[76px] min-h-[76px] bg-slate-50/95">
-                    <input type="search" id="calPropFilter" placeholder="Caută ID, nume, adresă…" class="w-full text-xs font-bold border border-slate-200 rounded-xl px-3 py-2 bg-white" autocomplete="off">
+            <div class="cal-sticky-header flex w-full min-w-0 items-stretch sticky top-0 z-10 border-b border-slate-200 shadow-sm [isolation:isolate]">
+                <div class="cal-prop-search-col cal-prop-col shrink-0 border-r border-slate-200 flex flex-col justify-end p-2 cal-header-prop bg-slate-50/95">
+                    <input type="search" id="calPropFilter" placeholder="Caută ID, nume…" class="w-full text-xs font-bold border border-slate-200 rounded-xl px-2 py-2 bg-white sm:px-3" autocomplete="off">
                 </div>
                 <div class="min-w-0 flex-1 min-h-0 flex flex-col bg-white/95">
-                    <div id="calDateHeaderHScroll" class="w-full min-w-0 overflow-x-auto [scrollbar-gutter:stable]">
+                    <div id="calDateHeaderHScroll" class="cal-h-scroll w-full min-w-0 overflow-x-auto [scrollbar-gutter:stable]">
                     <div class="inline-block align-top" style="min-width: calc(var(--cal-cell) * <?php echo (int) $dayCount; ?>);">
-                <div class="h-[76px] min-h-[76px] shrink-0 flex flex-col border-b border-slate-200 bg-white">
-                    <div class="flex h-[38px] shrink-0 min-h-0 border-b border-slate-200 bg-slate-50 text-[10px] font-extrabold uppercase tracking-widest text-slate-500">
+                <div class="cal-date-header shrink-0 flex flex-col border-b border-slate-200 bg-white">
+                    <div class="cal-month-row flex shrink-0 min-h-0 border-b border-slate-200 bg-slate-50 text-[10px] font-extrabold uppercase tracking-widest text-slate-500">
                         <?php foreach ($monthSpans as $ms): ?>
                             <div class="flex h-full items-center justify-center border-r border-slate-200 text-center" style="width: calc(var(--cal-cell) * <?php echo (int) $ms['span']; ?>); min-width: calc(var(--cal-cell) * <?php echo (int) $ms['span']; ?>);">
                                 <?php echo htmlspecialchars($ms['label'], ENT_QUOTES, 'UTF-8'); ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
-                    <div class="flex flex-1 min-h-0 bg-white text-[10px] font-bold h-[38px] min-h-0">
+                    <div class="cal-day-row flex flex-1 min-h-0 bg-white text-[10px] font-bold">
                         <?php foreach ($dates as $ymd): ?>
                             <?php
                             $dt = new DateTimeImmutable($ymd . ' 12:00:00');
@@ -65,8 +88,8 @@
                                 <?php if ($isToday): ?>
                                     <span class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-red-500 z-20 -translate-x-1/2 pointer-events-none" title="Azi"></span>
                                 <?php endif; ?>
-                                <span><?php echo htmlspecialchars($dow, ENT_QUOTES, 'UTF-8'); ?></span>
-                                <span class="text-slate-900"><?php echo htmlspecialchars($dt->format('j'), ENT_QUOTES, 'UTF-8'); ?></span>
+                                <span class="cal-day-dow"><?php echo htmlspecialchars($dow, ENT_QUOTES, 'UTF-8'); ?></span>
+                                <span class="text-slate-900 font-bold"><?php echo htmlspecialchars($dt->format('j'), ENT_QUOTES, 'UTF-8'); ?></span>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -76,7 +99,7 @@
                 </div>
             </div>
             <div class="flex w-full min-w-0 items-stretch">
-                <div class="w-64 shrink-0 border-r border-slate-200 flex flex-col bg-slate-50/80 [isolation:isolate]">
+                <div class="cal-prop-col shrink-0 border-r border-slate-200 flex flex-col bg-slate-50/80 [isolation:isolate]">
                     <div>
                 <?php foreach ($properties as $p): ?>
                     <?php
@@ -112,13 +135,13 @@
                         data-property="<?php echo $propJson; ?>"
                         title="<?php echo htmlspecialchars($calPropRowTitle, ENT_QUOTES, 'UTF-8'); ?>">
                         <div class="min-w-0 w-full font-bold text-slate-900 text-xs truncate"><?php echo htmlspecialchars($propTitlePlain, ENT_QUOTES, 'UTF-8'); ?></div>
-                        <div class="min-w-0 w-full text-[10px] text-cta font-extrabold uppercase mt-0.5 truncate">LOT ID: <?php echo htmlspecialchars((string) ($p['lot_id'] ?? '—'), ENT_QUOTES, 'UTF-8'); ?></div>
+                        <div class="cal-prop-lot min-w-0 w-full text-[10px] text-cta font-extrabold uppercase mt-0.5 truncate">LOT ID: <?php echo htmlspecialchars((string) ($p['lot_id'] ?? '—'), ENT_QUOTES, 'UTF-8'); ?></div>
                     </button>
                 <?php endforeach; ?>
                     </div>
                 </div>
                 <div class="flex min-w-0 min-h-0 flex-1 self-stretch flex flex-col min-h-0">
-                <div id="calGridHScroll" class="relative z-0 w-full min-w-0 min-h-0 shrink-0 self-stretch overflow-x-auto [scrollbar-gutter:stable]">
+                <div id="calGridHScroll" class="cal-h-scroll relative z-0 w-full min-w-0 min-h-0 shrink-0 self-stretch overflow-x-auto [scrollbar-gutter:stable]">
                     <div class="inline-block align-top" style="min-width: calc(var(--cal-cell) * <?php echo (int) $dayCount; ?>);">
                 <?php foreach ($properties as $p): ?>
                     <?php
@@ -301,6 +324,90 @@
     const dates = <?php echo json_encode($dates, JSON_UNESCAPED_UNICODE); ?>;
     const calScrollTodayIdx = <?php echo (int) $calScrollTodayIdx; ?>;
 
+    (function lhCalFitViewport() {
+        function isMobile() {
+            return window.matchMedia('(max-width: 767px)').matches;
+        }
+        function applyCellSize() {
+            const root = document.getElementById('calCalendarRoot');
+            if (!root) {
+                return;
+            }
+            if (!isMobile()) {
+                root.style.removeProperty('--cal-cell');
+                root.style.removeProperty('--cal-prop-col');
+                return;
+            }
+            const propCol = 116;
+            const vv = window.visualViewport;
+            const vw = vv ? vv.width : window.innerWidth;
+            const visibleDays = 8;
+            const cell = Math.max(32, Math.min(42, Math.floor((vw - propCol - 16) / visibleDays)));
+            root.style.setProperty('--cal-cell', cell + 'px');
+            root.style.setProperty('--cal-prop-col', propCol + 'px');
+        }
+        function apply() {
+            applyCellSize();
+            const shell = document.querySelector('.lh-cal-shell');
+            if (!shell) {
+                return;
+            }
+            const top = shell.getBoundingClientRect().top;
+            const vv = window.visualViewport;
+            const vh = vv ? vv.height : window.innerHeight;
+            const bottomPad = isMobile() ? 8 : 12;
+            const h = Math.max(isMobile() ? 320 : 400, Math.floor(vh - top - bottomPad));
+            shell.style.height = h + 'px';
+            shell.style.maxHeight = h + 'px';
+            if (typeof window.lhCalScrollToToday === 'function') {
+                window.lhCalScrollToToday();
+            }
+        }
+        window.lhCalFitViewportApply = apply;
+        apply();
+        window.addEventListener('resize', apply, { passive: true });
+        window.visualViewport?.addEventListener('resize', apply, { passive: true });
+        window.visualViewport?.addEventListener('scroll', apply, { passive: true });
+        if (typeof requestAnimationFrame === 'function') {
+            requestAnimationFrame(apply);
+        }
+    }());
+
+    (function lhCalOptionsToggle() {
+        const toggle = document.getElementById('lhCalOptionsToggle');
+        const panel = document.getElementById('lhCalOptionsPanel');
+        const icon = document.getElementById('lhCalOptionsToggleIcon');
+        if (!toggle || !panel) {
+            return;
+        }
+        const storageKey = 'lhCalOptionsOpen';
+        function setOpen(open) {
+            panel.classList.toggle('hidden', !open);
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (icon) {
+                icon.textContent = open ? '▴' : '▾';
+            }
+            try {
+                sessionStorage.setItem(storageKey, open ? '1' : '0');
+            } catch (e) {}
+            if (typeof window.lhCalFitViewportApply === 'function') {
+                if (typeof requestAnimationFrame === 'function') {
+                    requestAnimationFrame(window.lhCalFitViewportApply);
+                } else {
+                    window.lhCalFitViewportApply();
+                }
+            }
+        }
+        toggle.addEventListener('click', function () {
+            setOpen(panel.classList.contains('hidden'));
+        });
+        try {
+            if (sessionStorage.getItem(storageKey) === '1') {
+                setOpen(true);
+            }
+        } catch (e) {}
+    }());
+
     (function calScrollToTodayH() {
         function run() {
             const hScroll = document.getElementById('calDateHeaderHScroll');
@@ -325,6 +432,7 @@
                 sc.scrollLeft = v;
             }
         }
+        window.lhCalScrollToToday = run;
         if (typeof requestAnimationFrame === 'function') {
             requestAnimationFrame(run);
         } else {
@@ -478,34 +586,76 @@
         return true;
     }
 
+    function calCellFromPoint(x, y) {
+        const el = document.elementFromPoint(x, y);
+        return el ? el.closest('.cal-cell') : null;
+    }
+    function calStartDrag(row, cell) {
+        if (!cell || cell.getAttribute('data-selectable') !== '1') {
+            return false;
+        }
+        dragging = true;
+        dragProp = row.getAttribute('data-property-id');
+        const cells = Array.prototype.slice.call(row.querySelectorAll('.cal-cell'));
+        dragStartIdx = cells.indexOf(cell);
+        dragCurIdx = dragStartIdx;
+        if (dragStartIdx < 0) {
+            dragging = false;
+            return false;
+        }
+        highlightRange(row, dragStartIdx, dragStartIdx);
+        return true;
+    }
+    function calExtendDrag(row, cell) {
+        if (!dragging || dragProp !== row.getAttribute('data-property-id')) {
+            return;
+        }
+        if (!cell || cell.getAttribute('data-selectable') !== '1') {
+            return;
+        }
+        const cells = Array.prototype.slice.call(row.querySelectorAll('.cal-cell'));
+        const idx = cells.indexOf(cell);
+        if (idx < 0) {
+            return;
+        }
+        dragCurIdx = idx;
+        if (!highlightRange(row, dragStartIdx, dragCurIdx)) {
+            clearHighlight(row);
+        }
+    }
+
     document.querySelectorAll('.cal-grid-row').forEach(function (row) {
         row.addEventListener('mousedown', function (e) {
             const cell = e.target.closest('.cal-cell-selectable');
-            if (!cell || cell.getAttribute('data-selectable') !== '1') return;
-            dragging = true;
-            dragProp = row.getAttribute('data-property-id');
-            const cells = Array.prototype.slice.call(row.querySelectorAll('.cal-cell'));
-            dragStartIdx = cells.indexOf(cell);
-            dragCurIdx = dragStartIdx;
-            if (dragStartIdx < 0) return;
-            highlightRange(row, dragStartIdx, dragStartIdx);
+            if (!calStartDrag(row, cell)) {
+                return;
+            }
             e.preventDefault();
         });
         row.addEventListener('mouseover', function (e) {
-            if (!dragging || dragProp !== row.getAttribute('data-property-id')) return;
-            const cell = e.target.closest('.cal-cell');
-            if (!cell || cell.getAttribute('data-selectable') !== '1') return;
-            const cells = Array.prototype.slice.call(row.querySelectorAll('.cal-cell'));
-            const idx = cells.indexOf(cell);
-            if (idx < 0) return;
-            dragCurIdx = idx;
-            if (!highlightRange(row, dragStartIdx, dragCurIdx)) {
-                clearHighlight(row);
-            }
+            calExtendDrag(row, e.target.closest('.cal-cell'));
         });
+        row.addEventListener('touchstart', function (e) {
+            const cell = e.target.closest('.cal-cell-selectable');
+            if (!calStartDrag(row, cell)) {
+                return;
+            }
+        }, { passive: true });
+        row.addEventListener('touchmove', function (e) {
+            if (!dragging || dragProp !== row.getAttribute('data-property-id')) {
+                return;
+            }
+            const t = e.touches[0];
+            if (!t) {
+                return;
+            }
+            const cell = calCellFromPoint(t.clientX, t.clientY);
+            calExtendDrag(row, cell);
+            e.preventDefault();
+        }, { passive: false });
     });
 
-    document.addEventListener('mouseup', function () {
+    function calFinishDrag() {
         if (!dragging) return;
         dragging = false;
         const row = document.querySelector('.cal-grid-row[data-property-id="' + dragProp + '"]');
@@ -540,7 +690,10 @@
         document.getElementById('spRangeLabel').textContent = y0 + ' → ' + y1 + ' (inclusiv; checkout exclus)';
         clearHighlight(row);
         openModal('modalSpecial');
-    });
+    }
+    document.addEventListener('mouseup', calFinishDrag);
+    document.addEventListener('touchend', calFinishDrag, { passive: true });
+    document.addEventListener('touchcancel', calFinishDrag, { passive: true });
 })();
 document.addEventListener('DOMContentLoaded', function () {
     try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (e) { /* ignore */ }

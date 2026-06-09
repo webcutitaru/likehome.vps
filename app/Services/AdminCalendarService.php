@@ -128,7 +128,7 @@ final class AdminCalendarService
         $periodRows = PropertyPricingPeriod::query()
             ->where('date_end', '>', $fromYmd)
             ->where('date_start', '<', $rangeEndEx)
-            ->get(['property_id', 'date_start', 'date_end', 'price', 'price_weekend', 'label'])
+            ->get(['property_id', 'date_start', 'date_end', 'price', 'price_weekend', 'label', 'min_stay'])
             ->map(fn (PropertyPricingPeriod $p): array => [
                 'property_id' => $p->property_id,
                 'date_start' => self::toYmd($p->date_start),
@@ -136,6 +136,7 @@ final class AdminCalendarService
                 'price' => $p->price,
                 'price_weekend' => $p->price_weekend,
                 'label' => $p->label,
+                'min_stay' => $p->min_stay,
             ])
             ->all();
 

@@ -6,10 +6,11 @@ namespace Tests\Feature;
 
 use App\Legacy\LegacyBridge;
 use App\Models\BlockedDate;
-use App\Services\PropertySaveService;
 use App\Models\Booking;
 use App\Models\Property;
+use App\Models\PropertyPricingPeriod;
 use App\Models\User;
+use App\Services\PropertySaveService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -87,6 +88,73 @@ class AdminPanelAuditTest extends TestCase
         $response->assertOk();
         $response->assertSee('cal-cell-blocked', false);
         $response->assertSee('Blocat', false);
+    }
+
+    public function test_calendar_has_sticky_header_structure(): void
+    {
+        $response = $this->actingAs($this->admin)->get('/admin/property-calendar');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression(
+            '/id="calVertScroll"[^>]*>\s*<div class="cal-sticky-header[^"]*sticky top-0/s',
+            $html,
+            'Sticky header must be the first child inside #calVertScroll'
+        );
+    }
+
+    public function test_calendar_renders_coupon_indicator_on_booking_cell(): void
+    {
+        $property = $this->createProperty();
+
+        Booking::query()->create([
+            'property_id' => $property->id,
+            'guest_name' => 'Coupon Guest',
+            'guest_phone' => '+37360000001',
+            'guest_email' => 'coupon@example.com',
+            'check_in' => '2026-06-10',
+            'check_out' => '2026-06-13',
+            'guests' => 2,
+            'total_price' => 3000,
+            'coupon_code' => 'SUMMER10',
+            'coupon_discount_amount' => 300,
+            'status' => 'confirmed',
+            'locale' => 'ro',
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(
+            '/admin/property-calendar?from=2026-06-01&days=30'
+        );
+
+        $response->assertOk();
+        $response->assertSee('cal-cell-booking', false);
+        $response->assertSee('Coupon Guest', false);
+        $response->assertSee('aria-hidden="true">%</span>', false);
+    }
+
+    public function test_calendar_renders_calendar_special_price_marker(): void
+    {
+        $property = $this->createProperty(['min_stay' => 2]);
+
+        PropertyPricingPeriod::query()->create([
+            'property_id' => $property->id,
+            'date_start' => '2026-06-10',
+            'date_end' => '2026-06-20',
+            'price' => 900,
+            'price_weekend' => 1000,
+            'label' => 'Preț special (calendar)',
+            'min_stay' => 3,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(
+            '/admin/property-calendar?from=2026-06-01&days=30'
+        );
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertStringContainsString('whitespace-nowrap">*3</span>', $html);
+        $this->assertStringContainsString('font-extrabold text-slate-900 leading-tight">900</span>', $html);
+        $this->assertStringContainsString('sejur min. 3 nop', $html);
     }
 
     public function test_property_editor_loads_correct_ical_export_url(): void

@@ -62,13 +62,13 @@ class PropertyCalendar extends Page
         ]);
     }
 
-    public function getHeading(): string|Htmlable
+    public function getHeading(): string|Htmlable|null
     {
-        return 'Calendar rezervări și prețuri';
+        return '';
     }
 
     public function getSubheading(): string|Htmlable|null
     {
-        return 'Prețuri pe noapte, rezervări și blocări pe proprietăți';
+        return null;
     }
 }
