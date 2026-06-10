@@ -112,7 +112,7 @@ class ViewBooking extends ViewRecord
                     if ($result['ok']) {
                         $this->record->refresh();
                         $this->refreshFormData([
-                            'payment_status', 'refunded_amount', 'payment_amount', 'paid_at',
+                            'payment_status', 'refunded_amount', 'payment_amount', 'paid_at', 'maib_refund_id',
                         ]);
                     }
                 }),

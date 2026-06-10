@@ -48,7 +48,7 @@ class AdminPanelAuditTest extends TestCase
             ['/admin', ['Salutare', 'Proprietăți']],
             ['/admin/property-calendar', ['Calendar rezervări și prețuri', 'calCalendarRoot']],
             ['/admin/bookings', ['Rezervări']],
-            ['/admin/bookings/'.$booking->id, ['Oaspete', (string) $booking->id]],
+            ['/admin/bookings/'.$booking->id, ['Rezervare', (string) $booking->id]],
             ['/admin/properties', ['Proprietăți']],
             ['/admin/properties/create', ['Adaugă locuință nouă', 'Creează proprietatea']],
             ['/admin/discount-coupons', ['Cupoane']],

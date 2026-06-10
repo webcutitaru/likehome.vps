@@ -60,9 +60,6 @@ class BookingResource extends Resource
                                 ->label('Creată la')
                                 ->dateTime('d.m.Y H:i'),
                         ]),
-                    ]),
-                Section::make('Oaspete')
-                    ->schema([
                         Grid::make(2)->schema([
                             TextEntry::make('guest_name')->label('Nume'),
                             TextEntry::make('guest_phone')->label('Telefon'),
@@ -106,6 +103,24 @@ class BookingResource extends Resource
                             TextEntry::make('checkin_reminder_sent_at')->label('Reminder trimis')
                                 ->dateTime('d.m.Y H:i')
                                 ->placeholder('—'),
+                            TextEntry::make('maib_checkout_id')
+                                ->label('checkout_id (maib)')
+                                ->placeholder('—')
+                                ->copyable()
+                                ->columnSpanFull()
+                                ->visible(fn (Booking $record): bool => $record->payment_method === 'online'),
+                            TextEntry::make('maib_payment_id')
+                                ->label('payment_id (maib)')
+                                ->placeholder('—')
+                                ->copyable()
+                                ->columnSpanFull()
+                                ->visible(fn (Booking $record): bool => $record->payment_method === 'online'),
+                            TextEntry::make('maib_refund_id')
+                                ->label('refund_id (maib)')
+                                ->placeholder('—')
+                                ->copyable()
+                                ->columnSpanFull()
+                                ->visible(fn (Booking $record): bool => $record->payment_method === 'online'),
                         ]),
                     ]),
             ]);
