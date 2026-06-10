@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\ConfiguresPropertyGalleryUpload;
 use App\Filament\Navigation\AdminNavigationGroup;
 use App\Legacy\LegacyBridge;
 use App\Services\PropertyCreateService;
@@ -11,7 +12,6 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -25,6 +25,7 @@ use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Exceptions\Halt;
@@ -39,6 +40,7 @@ use UnitEnum;
 class AddProperty extends Page
 {
     use CanUseDatabaseTransactions;
+    use ConfiguresPropertyGalleryUpload;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPlusCircle;
 
@@ -229,16 +231,12 @@ class AddProperty extends Page
                         Tab::make('gallery')
                             ->label('Galerie')
                             ->schema([
-                                FileUpload::make('new_images')
+                                View::make('filament.pages.partials.property-gallery-styles'),
+                                $this->makePropertyGalleryUpload()
                                     ->label('Imagini (trage pentru a reordona)')
                                     ->disk('public')
                                     ->directory('uploads/properties/incoming')
-                                    ->image()
-                                    ->multiple()
-                                    ->reorderable()
-                                    ->maxFiles(30)
-                                    ->helperText('Ordinea din listă = ordinea din galerie. Prima imagine devine coperta.')
-                                    ->dehydrated(true),
+                                    ->helperText('Ordinea din listă = ordinea din galerie. Prima imagine devine coperta.'),
                             ]),
                     ])
                     ->columnSpanFull(),

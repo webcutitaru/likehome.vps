@@ -4,20 +4,22 @@
     $images = is_array($images ?? null) ? $images : [];
 @endphp
 
+@include('filament.pages.partials.property-gallery-styles')
+
 <div class="property-gallery-dnd space-y-3">
     <p class="text-sm text-gray-500 dark:text-gray-400">
         Trage imaginile pentru a schimba ordinea. Prima poză devine coperta listării.
     </p>
 
     @if ($images === [])
-        <p class="rounded-xl border border-dashed border-gray-300 px-4 py-6 text-center text-sm text-gray-500 dark:border-gray-600">
+        <p class="rounded-lg border border-dashed border-gray-300 px-3 py-4 text-center text-sm text-gray-500 dark:border-gray-600">
             Nicio imagine încă. Adaugă poze mai jos.
         </p>
     @endif
 
     <div
         id="lhPropertyGalleryGrid"
-        class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+        class="lh-gallery-grid"
         wire:key="gallery-grid-{{ md5(json_encode($images)) }}"
     >
         @foreach ($images as $row)
@@ -30,11 +32,11 @@
             <div class="lh-gallery-item lh-gallery-existing group relative" data-basename="{{ $basename }}">
                 <button
                     type="button"
-                    class="lh-gallery-drag absolute left-2 top-2 z-20 flex h-8 w-8 cursor-grab items-center justify-center rounded-lg bg-gray-900/75 text-xs text-white shadow active:cursor-grabbing"
+                    class="lh-gallery-drag absolute z-20 flex cursor-grab items-center justify-center bg-gray-900/75 text-white shadow active:cursor-grabbing"
                     title="Trage pentru a reordona"
                     aria-label="Reordonează"
                 >⋮⋮</button>
-                <div class="aspect-square overflow-hidden rounded-xl border border-gray-200 bg-gray-50 dark:border-gray-700">
+                <div class="lh-gallery-thumb">
                     <img
                         src="{{ lh_property_image_url($propertyId, $basename, 'thumb') }}"
                         alt=""
@@ -44,12 +46,9 @@
                 </div>
                 <button
                     type="button"
-                    class="lh-gallery-remove-existing absolute right-2 top-2 rounded-lg bg-gray-900/80 px-2 py-1 text-xs font-bold text-white opacity-0 transition group-hover:opacity-100 hover:bg-red-600"
+                    class="lh-gallery-remove-existing absolute rounded-md bg-gray-900/80 font-bold text-white transition hover:bg-red-600"
                     title="Elimină din galerie"
                 >✕</button>
-                <div class="mt-1 truncate text-center text-[10px] font-semibold text-gray-500" title="{{ $basename }}">
-                    {{ $basename }}
-                </div>
             </div>
         @endforeach
     </div>

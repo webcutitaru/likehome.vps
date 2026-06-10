@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\ConfiguresPropertyGalleryUpload;
 use App\Filament\Concerns\InteractsWithPropertyGallery;
 use App\Filament\Pages\Dashboard;
 use App\Legacy\LegacyBridge;
@@ -14,7 +15,6 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -44,6 +44,7 @@ use Throwable;
 class EditProperty extends Page
 {
     use CanUseDatabaseTransactions;
+    use ConfiguresPropertyGalleryUpload;
     use InteractsWithPropertyGallery;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPencilSquare;
@@ -335,15 +336,10 @@ class EditProperty extends Page
                                         'propertyId' => $this->getPropertyIdForUpload(),
                                         'images' => $this->data['existing_images'] ?? [],
                                     ]),
-                                FileUpload::make('new_images')
+                                $this->makePropertyGalleryUpload()
                                     ->label('Încarcă imagini noi')
                                     ->disk('public')
-                                    ->directory(fn (): string => 'uploads/properties/'.$this->getPropertyIdForUpload().'/incoming')
-                                    ->image()
-                                    ->multiple()
-                                    ->reorderable()
-                                    ->maxFiles(30)
-                                    ->dehydrated(true),
+                                    ->directory(fn (): string => 'uploads/properties/'.$this->getPropertyIdForUpload().'/incoming'),
                             ]),
                     ])
                     ->columnSpanFull(),
