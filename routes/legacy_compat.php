@@ -61,6 +61,6 @@ Route::get('admin/edit-property.php', static function (Request $request) {
     $id = (int) $request->query('id', 0);
 
     return $id > 0
-        ? redirect('/admin/properties/'.$id.'/edit', 301)
+        ? redirect('/admin/edit-property/'.$id, 301)
         : redirect('/admin', 301);
 });
