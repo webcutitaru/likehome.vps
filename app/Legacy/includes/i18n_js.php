@@ -20,7 +20,7 @@ window.lhSiteBasePath = <?= json_encode($base, JSON_UNESCAPED_UNICODE) ?>;
 function lhT(key, replace) {
   var s = (window.lhI18n && window.lhI18n[key]) || key;
   if (replace && typeof replace === 'object') {
-    Object.keys(replace).forEach(function (k) {
+    Object.keys(replace).sort(function (a, b) { return b.length - a.length; }).forEach(function (k) {
       s = s.split(':' + k).join(String(replace[k]));
     });
   }
