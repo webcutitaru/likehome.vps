@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Filament\Auth\Login;
 use App\Livewire\SubdirectoryHandleRequests;
 use App\Models\AdminActivityLog;
 use App\Models\Booking;
@@ -13,9 +14,12 @@ use App\Policies\BookingPolicy;
 use App\Policies\DiscountCouponPolicy;
 use App\Policies\PropertyPolicy;
 use App\Policies\UserPolicy;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Mechanisms\HandleRequests\HandleRequests;
 
@@ -43,6 +47,19 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(DiscountCoupon::class, DiscountCouponPolicy::class);
         Gate::policy(Property::class, PropertyPolicy::class);
         Gate::policy(AdminActivityLog::class, AdminActivityLogPolicy::class);
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::STYLES_AFTER,
+            fn (): ?HtmlString => request()->routeIs('filament.admin.auth.login')
+                ? new HtmlString('<link rel="stylesheet" href="'.asset('assets/css/admin-login-colors.css').'">')
+                : null,
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIMPLE_PAGE_START,
+            fn (): \Illuminate\Contracts\View\View => view('filament.auth.login-branding'),
+            scopes: Login::class,
+        );
     }
 
     private function configureSubdirectoryUrls(): void

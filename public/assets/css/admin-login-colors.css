@@ -1,0 +1,157 @@
+/**
+ * LikeHome admin login — culori din likehome.md/admin/login.php
+ * Scoped pe body.lh-login-colors (doar pagina /admin/login).
+ */
+
+.lh-login-colors.fi-body {
+    background: linear-gradient(to bottom right, #0f172a, #020617, #000000);
+}
+
+.lh-login-colors .fi-simple-layout {
+    background: transparent;
+}
+
+.lh-login-brand {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.lh-login-brand-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1rem;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.lh-login-brand-title {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.875rem;
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+.lh-login-brand-admin {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.875rem;
+    font-weight: 700;
+    vertical-align: top;
+}
+
+.lh-login-brand-subtitle {
+    margin: 0.5rem 0 0;
+    color: #94a3b8;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.lh-login-colors .fi-simple-main {
+    background-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    --tw-ring-shadow: none;
+    --tw-shadow: none;
+}
+
+.lh-login-colors form#form,
+.lh-login-colors form#multiFactorChallengeForm {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+}
+
+.lh-login-colors .fi-fo-field:has(input.fi-input) .fi-fo-field-label,
+.lh-login-colors .fi-fo-field:has(input.fi-input) .fi-fo-field-label-content {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.lh-login-colors .fi-fo-field:has(.fi-checkbox-input) .fi-fo-field-label {
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.lh-login-colors .fi-input-wrp {
+    background-color: #f8f9fb;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 1rem;
+    box-shadow: none;
+    --tw-ring-shadow: none;
+    --tw-shadow: none;
+}
+
+.lh-login-colors .fi-input-wrp:focus-within {
+    border-color: #4a6741;
+    box-shadow: 0 0 0 2px rgba(74, 103, 65, 0.25);
+}
+
+.lh-login-colors input.fi-input {
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    color: #2d2f34;
+    padding-block: 1rem;
+    outline: none;
+}
+
+.lh-login-colors input.fi-input::placeholder {
+    color: #94a3b8;
+}
+
+.lh-login-colors input.fi-input:focus {
+    border: none;
+    box-shadow: none;
+    outline: none;
+    --tw-ring-shadow: none;
+}
+
+.lh-login-colors .fi-btn.fi-color-primary:not(.fi-outlined) {
+    --bg: #4a6741;
+    background-color: #4a6741;
+    color: #ffffff;
+    border-radius: 1rem;
+    font-weight: 800;
+    font-size: 1.125rem;
+    padding-block: 1.25rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+}
+
+.lh-login-colors .fi-btn.fi-color-primary:not(.fi-outlined):hover {
+    filter: brightness(1.1);
+}
+
+.lh-login-colors .fi-fo-field-wrp-error-message,
+.lh-login-colors .fi-invalid-message,
+.lh-login-colors .fi-banner-danger {
+    background-color: #fef2f2;
+    border-color: #fee2e2;
+    color: #991b1b;
+    border-radius: 1rem;
+}
+
+.lh-login-colors input.fi-checkbox-input:checked {
+    background-color: #4a6741;
+    --tw-ring-color: #4a6741;
+}

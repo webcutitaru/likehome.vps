@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\Login;
 use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\StripLegacyCspForAdmin;
@@ -30,7 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(Login::class)
             ->brandName('LikeHome')
             ->colors([
                 'primary' => Color::rgb('92, 94, 98'),
