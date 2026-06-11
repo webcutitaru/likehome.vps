@@ -113,4 +113,12 @@ return [
     'email.confirm_order_no' => 'Nr. comandă',
     'email.confirm_signoff' => 'Cu stimă,',
     'email.confirm_team' => 'Like Home Team',
+    'email.pending_subject' => 'Finalizează plata — Like Home',
+    'email.pending_intro' => 'Rezervarea ta a fost înregistrată, însă plata online nu este încă finalizată.',
+    'email.pending_action' => 'Te rugăm să accesezi linkul de mai jos pentru a finaliza plata:',
+    'email.pending_link' => 'Link plată',
+    'email.pending_amount' => 'Sumă de plată',
+    'email.pending_deadline' => 'Ai la dispoziție :minutes minute. După acest termen, rezervarea se anulează automat dacă plata nu este completată.',
+    'email.pending_expires_at' => 'Termen limită: :datetime',
+    'email.pending_note' => 'Rezervarea va fi confirmată doar după plata cu succes. Vei primi un email separat de confirmare.',
 ];

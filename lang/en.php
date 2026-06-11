@@ -113,4 +113,12 @@ return [
     'email.confirm_order_no' => 'Order no.',
     'email.confirm_signoff' => 'Best regards,',
     'email.confirm_team' => 'Like Home Team',
+    'email.pending_subject' => 'Complete your payment — Like Home',
+    'email.pending_intro' => 'Your booking has been registered, but online payment is not yet complete.',
+    'email.pending_action' => 'Please use the link below to complete your payment:',
+    'email.pending_link' => 'Payment link',
+    'email.pending_amount' => 'Amount due',
+    'email.pending_deadline' => 'You have :minutes minutes to pay. After that, the booking is automatically cancelled if payment is not completed.',
+    'email.pending_expires_at' => 'Deadline: :datetime',
+    'email.pending_note' => 'Your booking will be confirmed only after successful payment. You will receive a separate confirmation email.',
 ];

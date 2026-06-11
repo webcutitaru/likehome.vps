@@ -164,6 +164,116 @@ if (!function_exists('lh_build_guest_booking_confirmation_body')) {
     }
 }
 
+if (!function_exists('lh_build_guest_booking_pending_payment_body')) {
+    /**
+     * @param array{
+     *   guest_name: string,
+     *   property_title: string,
+     *   check_in: string,
+     *   check_out: string,
+     *   guests: int,
+     *   total_price: float|string,
+     *   booking_id: int,
+     *   checkout_url: string,
+     *   payment_due_amount: float|int|string,
+     *   ttl_minutes: int,
+     *   payment_expires_at?: string,
+     *   locale?: string,
+     *   coupon_code?: string,
+     *   coupon_discount_amount?: float|int|string,
+     *   online_discount_amount?: float|int|string
+     * } $ctx
+     */
+    function lh_build_guest_booking_pending_payment_body(array $ctx): string
+    {
+        $locale = (string) ($ctx['locale'] ?? lh_default_locale());
+        $t = static fn (string $key, array $replace = []) => lh_translate($key, $replace, $locale);
+
+        $guestName = (string) ($ctx['guest_name'] ?? '');
+        $first = lh_booking_guest_first_name($guestName);
+        if ($first === 'oaspete' && $locale !== 'ro') {
+            $first = lh_translate('email.guest_fallback', [], $locale);
+        }
+        $propertyTitle = (string) ($ctx['property_title'] ?? '');
+        $checkIn = (string) ($ctx['check_in'] ?? '');
+        $checkOut = (string) ($ctx['check_out'] ?? '');
+        $guests = (int) ($ctx['guests'] ?? 1);
+        $total = $ctx['total_price'] ?? 0;
+        $totalFormatted = function_exists('lh_format_money')
+            ? lh_format_money((float) $total, 2)
+            : (string) $total;
+        $dueFormatted = function_exists('lh_format_money')
+            ? lh_format_money((float) ($ctx['payment_due_amount'] ?? $total), 2)
+            : (string) ($ctx['payment_due_amount'] ?? $total);
+        $bookingId = (int) ($ctx['booking_id'] ?? 0);
+        $checkoutUrl = trim((string) ($ctx['checkout_url'] ?? ''));
+        $ttlMinutes = max(5, (int) ($ctx['ttl_minutes'] ?? lh_booking_pending_ttl_minutes()));
+
+        $expiresDisplay = '';
+        $expiresRaw = trim((string) ($ctx['payment_expires_at'] ?? ''));
+        if ($expiresRaw !== '') {
+            try {
+                $expiresDisplay = (new DateTimeImmutable($expiresRaw))->format('d.m.Y H:i');
+            } catch (Throwable) {
+                $expiresDisplay = $expiresRaw;
+            }
+        }
+
+        $phones = lh_booking_guest_support_phones_block();
+        $contactUrl = function_exists('lh_absolute_locale_url')
+            ? lh_absolute_locale_url('contact.php', $locale)
+            : 'https://www.likehome.md/contact.php';
+
+        $lines = [];
+        $lines[] = $t('email.confirm_greeting', ['name' => $first]);
+        $lines[] = '';
+        $lines[] = $t('email.pending_intro');
+        $lines[] = '';
+        $lines[] = $t('email.confirm_details');
+        $lines[] = $t('email.confirm_property') . ': ' . $propertyTitle;
+        $lines[] = $t('email.confirm_period') . ': ' . $checkIn . ' → ' . $checkOut;
+        $lines[] = $t('email.confirm_guests') . ': ' . $guests;
+        $cCode = trim((string) ($ctx['coupon_code'] ?? ''));
+        $cDisc = isset($ctx['coupon_discount_amount']) ? (float) $ctx['coupon_discount_amount'] : 0.0;
+        if ($cCode !== '' && $cDisc > 0.004) {
+            $discFmt = function_exists('lh_format_money')
+                ? lh_format_money($cDisc, 2)
+                : (string) $cDisc;
+            $lines[] = '«' . $cCode . '»: -' . $discFmt;
+        }
+        $lines[] = $t('email.confirm_total') . ': ' . $totalFormatted;
+        if (!empty($ctx['online_discount_amount']) && (float) $ctx['online_discount_amount'] > 0.004) {
+            $discOnline = function_exists('lh_format_money')
+                ? lh_format_money((float) $ctx['online_discount_amount'], 2)
+                : (string) $ctx['online_discount_amount'];
+            $lines[] = $t('email.confirm_online_discount') . ': -' . $discOnline;
+        }
+        $lines[] = $t('email.pending_amount') . ': ' . $dueFormatted;
+        $lines[] = 'Booking ID: #' . $bookingId;
+        $lines[] = '';
+        $lines[] = $t('email.pending_action');
+        if ($checkoutUrl !== '') {
+            $lines[] = $t('email.pending_link') . ': ' . $checkoutUrl;
+        }
+        $lines[] = '';
+        $lines[] = $t('email.pending_deadline', ['minutes' => (string) $ttlMinutes]);
+        if ($expiresDisplay !== '') {
+            $lines[] = $t('email.pending_expires_at', ['datetime' => $expiresDisplay]);
+        }
+        $lines[] = '';
+        $lines[] = $t('email.pending_note');
+        $lines[] = '';
+        $lines[] = $phones;
+        $lines[] = '';
+        $lines[] = $contactUrl;
+        $lines[] = '';
+        $lines[] = $t('email.confirm_signoff');
+        $lines[] = $t('email.confirm_team');
+
+        return implode("\n", $lines);
+    }
+}
+
 if (!function_exists('lh_build_guest_checkin_reminder_body')) {
     /**
      * @param array<string,mixed> $row Same keys as lh_checkin_reminder_send_for_booking_row input (+ optional floor)

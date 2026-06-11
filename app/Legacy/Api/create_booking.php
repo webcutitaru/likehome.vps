@@ -409,6 +409,21 @@ function lh_api_create_booking(): array
             ];
         }
 
+        $stmtFresh = $pdo->prepare('SELECT * FROM bookings WHERE id = ? LIMIT 1');
+        $stmtFresh->execute([$booking_id]);
+        $bookingRow = $stmtFresh->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        if ($checkout_url !== null && $checkout_url !== '') {
+            lh_booking_send_pending_payment_notifications(
+                $pdo,
+                $bookingRow,
+                $property,
+                $bookingLocale,
+                $checkout_url,
+                $ttlMinutes
+            );
+        }
+
         return [
             'status' => 200,
             'body' => [

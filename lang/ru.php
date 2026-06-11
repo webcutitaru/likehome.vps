@@ -113,4 +113,12 @@ return [
     'email.confirm_order_no' => '№ заказа',
     'email.confirm_signoff' => 'С уважением,',
     'email.confirm_team' => 'Like Home Team',
+    'email.pending_subject' => 'Завершите оплату — Like Home',
+    'email.pending_intro' => 'Ваше бронирование зарегистрировано, но онлайн-оплата ещё не завершена.',
+    'email.pending_action' => 'Пожалуйста, перейдите по ссылке ниже, чтобы завершить оплату:',
+    'email.pending_link' => 'Ссылка для оплаты',
+    'email.pending_amount' => 'К оплате',
+    'email.pending_deadline' => 'У вас есть :minutes минут. После этого бронирование автоматически отменится, если оплата не будет завершена.',
+    'email.pending_expires_at' => 'Срок: :datetime',
+    'email.pending_note' => 'Бронирование будет подтверждено только после успешной оплаты. Вы получите отдельное письмо с подтверждением.',
 ];

@@ -156,6 +156,105 @@ if (!function_exists('lh_booking_send_confirmation_notifications')) {
     }
 }
 
+if (!function_exists('lh_booking_send_pending_payment_notifications')) {
+    function lh_booking_send_pending_payment_notifications(
+        PDO $pdo,
+        array $booking,
+        array $property,
+        string $bookingLocale,
+        string $checkoutUrl,
+        int $ttlMinutes
+    ): void {
+        $booking_id = (int) ($booking['id'] ?? 0);
+        $guest_name = (string) ($booking['guest_name'] ?? '');
+        $guest_phone = (string) ($booking['guest_phone'] ?? '');
+        $guest_email = (string) ($booking['guest_email'] ?? '');
+        $check_in = (string) ($booking['check_in'] ?? '');
+        $check_out = (string) ($booking['check_out'] ?? '');
+        $guests = (int) ($booking['guests'] ?? 0);
+        $total_price = (float) ($booking['total_price'] ?? 0);
+        $payment_due = (float) ($booking['payment_due_amount'] ?? $total_price);
+        $coupon_code_ins = $booking['coupon_code'] ?? null;
+        $coupon_discount_ins = (float) ($booking['coupon_discount_amount'] ?? 0);
+        $payment_expires_at = (string) ($booking['payment_expires_at'] ?? '');
+
+        $property_title = $property['title'] ?? ('Property #' . (int) ($booking['property_id'] ?? 0));
+        if (function_exists('lh_property_apply_locale')) {
+            $property = lh_property_apply_locale($property, $pdo, $bookingLocale);
+            $property_title = $property['title'] ?? $property_title;
+        }
+
+        $admin_notification_email = lh_booking_resolve_admin_notification_email();
+        $telegram_bot_token = defined('TELEGRAM_BOT_TOKEN') ? trim((string) TELEGRAM_BOT_TOKEN) : '';
+        $telegram_chat_id = defined('TELEGRAM_CHAT_ID') ? trim((string) TELEGRAM_CHAT_ID) : '';
+
+        $admin_subject = 'Rezervare nouă #' . $booking_id . ' — plată în așteptare - ' . $property_title;
+        $admin_message = "Ai primit o rezervare nouă pe site (plată online nefinalizată).\n\n"
+            . "Booking ID: #" . $booking_id . "\n"
+            . "Proprietate: " . $property_title . "\n"
+            . "Nume client: " . $guest_name . "\n"
+            . "Telefon: " . $guest_phone . "\n"
+            . "Email: " . $guest_email . "\n"
+            . "Check-in: " . $check_in . "\n"
+            . "Check-out: " . $check_out . "\n"
+            . "Oaspeți: " . $guests . "\n"
+            . ($coupon_discount_ins > 0.004 && $coupon_code_ins !== null && trim((string) $coupon_code_ins) !== ''
+                ? ('Reducere cupon «' . trim((string) $coupon_code_ins) . '»: ' . lh_format_money($coupon_discount_ins, 2) . "\n")
+                : '')
+            . 'De plată online: ' . lh_format_money($payment_due, 2) . "\n"
+            . 'Termen plată: ' . $ttlMinutes . " minute\n"
+            . ($checkoutUrl !== '' ? ("Link plată: " . $checkoutUrl . "\n") : '')
+            . "Status: plată în așteptare\n";
+
+        if (!empty($admin_notification_email)) {
+            send_booking_notification($admin_notification_email, $admin_subject, $admin_message, $guest_email);
+        }
+
+        $telegram_message = "⏳ Rezervare — plată în așteptare\n\n"
+            . "Booking ID: #" . $booking_id . "\n"
+            . "Proprietate: " . $property_title . "\n"
+            . "Nume: " . $guest_name . "\n"
+            . "Telefon: " . $guest_phone . "\n"
+            . "Email: " . $guest_email . "\n"
+            . "Check-in: " . $check_in . "\n"
+            . "Check-out: " . $check_out . "\n"
+            . "Oaspeți: " . $guests . "\n"
+            . 'De plată: ' . lh_format_money($payment_due, 2) . "\n"
+            . 'Termen: ' . $ttlMinutes . " min\n"
+            . "Status: plată în așteptare";
+
+        if (!empty($telegram_bot_token) && !empty($telegram_chat_id)) {
+            send_telegram_notification($telegram_bot_token, $telegram_chat_id, $telegram_message);
+        }
+
+        $guestBodyCtx = [
+            'guest_name' => $guest_name,
+            'property_title' => $property_title,
+            'check_in' => $check_in,
+            'check_out' => $check_out,
+            'guests' => $guests,
+            'total_price' => $total_price,
+            'booking_id' => $booking_id,
+            'locale' => $bookingLocale,
+            'checkout_url' => $checkoutUrl,
+            'payment_due_amount' => $payment_due,
+            'ttl_minutes' => $ttlMinutes,
+            'payment_expires_at' => $payment_expires_at,
+        ];
+        if ($coupon_discount_ins > 0.004 && $coupon_code_ins !== null && trim((string) $coupon_code_ins) !== '') {
+            $guestBodyCtx['coupon_code'] = (string) $coupon_code_ins;
+            $guestBodyCtx['coupon_discount_amount'] = $coupon_discount_ins;
+        }
+        if ((float) ($booking['online_discount_amount'] ?? 0) > 0.004) {
+            $guestBodyCtx['online_discount_amount'] = (float) $booking['online_discount_amount'];
+        }
+
+        $client_subject = lh_translate('email.pending_subject', [], $bookingLocale);
+        $client_message = lh_build_guest_booking_pending_payment_body($guestBodyCtx);
+        send_booking_notification($guest_email, $client_subject, $client_message, $admin_notification_email);
+    }
+}
+
 if (!function_exists('lh_booking_confirm_after_online_payment')) {
     function lh_booking_confirm_after_online_payment(
         PDO $pdo,
