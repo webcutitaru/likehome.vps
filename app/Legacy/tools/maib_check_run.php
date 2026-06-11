@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__.'/../includes/booking_payment.php';
+require_once __DIR__.'/../includes/booking_notifications.php';
 require_once __DIR__.'/../includes/maib_client.php';
 
 function lh_maib_check_line(string $label, string $value): void
@@ -26,6 +27,40 @@ lh_maib_check_line('MAIB_SIGNATURE_KEY', trim(lh_env('MAIB_SIGNATURE_KEY', '')) 
 lh_maib_check_line('Vendor SDK', class_exists(\MaibEcomm\MaibCheckoutSdk\MaibCheckoutApiRequest::class) ? 'OK' : 'MISSING — vendor/maib-ecomm');
 lh_maib_check_line('curl', function_exists('curl_init') ? 'OK' : 'MISSING');
 lh_maib_check_line('openssl', extension_loaded('openssl') ? 'OK' : 'MISSING');
+
+echo "\n--- Notifications ---\n";
+lh_maib_check_line('MAILJET_READY', (defined('MAILJET_READY') && MAILJET_READY) ? 'yes' : 'NO');
+lh_maib_check_line('BOOKING_MAIL_FROM', (defined('BOOKING_MAIL_FROM') && trim((string) BOOKING_MAIL_FROM) !== '') ? (string) BOOKING_MAIL_FROM : 'MISSING');
+$adminEmail = lh_booking_resolve_admin_notification_email();
+lh_maib_check_line('ADMIN email', $adminEmail !== '' ? $adminEmail : 'MISSING');
+lh_maib_check_line('TELEGRAM token', (defined('TELEGRAM_BOT_TOKEN') && trim((string) TELEGRAM_BOT_TOKEN) !== '') ? 'set' : 'MISSING');
+lh_maib_check_line('TELEGRAM chat', (defined('TELEGRAM_CHAT_ID') && trim((string) TELEGRAM_CHAT_ID) !== '') ? (string) TELEGRAM_CHAT_ID : 'MISSING');
+lh_maib_check_line('allow_url_fopen', ini_get('allow_url_fopen') ? 'On' : 'Off');
+$createBookingPath = function_exists('base_path')
+    ? base_path('app/Legacy/Api/create_booking.php')
+    : dirname(__DIR__, 3).'/app/Legacy/Api/create_booking.php';
+$createBookingSrc = is_readable($createBookingPath) ? (string) file_get_contents($createBookingPath) : '';
+lh_maib_check_line('pending email code', str_contains($createBookingSrc, 'lh_booking_send_pending_payment_notifications') ? 'yes' : 'NO — git pull needed');
+
+$sendTest = isset($_GET['send']) && (string) $_GET['send'] === '1';
+if ($sendTest) {
+    echo "\n--- Send test (?send=1) ---\n";
+    if ($adminEmail === '') {
+        lh_maib_check_line('email test', 'SKIP — no admin email');
+    } else {
+        $ts = date('Y-m-d H:i:s');
+        $emailOk = send_booking_notification($adminEmail, '[TEST maib_check] LikeHome '.$ts, 'Test email from maib_check diagnostic.');
+        lh_maib_check_line('email test', $emailOk ? 'OK' : 'FAILED — see error_log');
+    }
+    $tgToken = defined('TELEGRAM_BOT_TOKEN') ? trim((string) TELEGRAM_BOT_TOKEN) : '';
+    $tgChat = defined('TELEGRAM_CHAT_ID') ? trim((string) TELEGRAM_CHAT_ID) : '';
+    if ($tgToken === '' || $tgChat === '') {
+        lh_maib_check_line('telegram test', 'SKIP — not configured');
+    } else {
+        $tgOk = send_telegram_notification($tgToken, $tgChat, '⏳ [TEST maib_check] '.date('Y-m-d H:i:s'));
+        lh_maib_check_line('telegram test', $tgOk ? 'OK' : 'FAILED — see error_log');
+    }
+}
 
 try {
     $pdo = getPDO();
