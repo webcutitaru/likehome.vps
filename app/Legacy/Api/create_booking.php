@@ -219,7 +219,8 @@ function lh_api_create_booking(): array
         $paymentStatus = $payment_method === 'online' ? 'pending' : 'pay_at_property';
         $ttlMinutes = lh_booking_pending_ttl_minutes();
         $expiresStmt = $pdo->query('SELECT DATE_ADD(NOW(), INTERVAL ' . (int) $ttlMinutes . ' MINUTE) AS expires_at');
-        $expiresAt = $expiresStmt ? (string) ($expiresStmt->fetch(PDO::FETCH_ASSOC)['expires_at'] ?? '') : '';
+        $expiresRow = $expiresStmt ? $expiresStmt->fetch(PDO::FETCH_ASSOC) : false;
+        $expiresAt = is_array($expiresRow) ? (string) ($expiresRow['expires_at'] ?? '') : '';
         if ($expiresAt === '') {
             $expiresAt = (new DateTimeImmutable('now'))->modify('+' . $ttlMinutes . ' minutes')->format('Y-m-d H:i:s');
         }
@@ -432,8 +433,12 @@ function lh_api_create_booking(): array
                 $ttlMinutes
             );
 
-            require_once dirname(__DIR__) . '/includes/payment_reminder_send.php';
-            lh_schedule_booking_payment_reminder($booking_id);
+            try {
+                require_once dirname(__DIR__) . '/includes/payment_reminder_send.php';
+                lh_schedule_booking_payment_reminder($booking_id);
+            } catch (Throwable $e) {
+                error_log('create_booking payment_reminder_schedule: ' . $e->getMessage());
+            }
         }
 
         return [
@@ -450,7 +455,7 @@ function lh_api_create_booking(): array
                 'total_price' => $total_price,
             ],
         ];
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         if (isset($pdo) && $pdo->inTransaction()) {
             $pdo->rollBack();
         }

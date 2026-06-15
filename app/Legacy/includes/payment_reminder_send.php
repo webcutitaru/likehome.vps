@@ -153,11 +153,23 @@ function lh_payment_reminder_send_for_booking_row(PDO $pdo, array $row, array $o
     return ['result' => 'sent'];
 }
 
+if (!function_exists('lh_php_function_disabled')) {
+    function lh_php_function_disabled(string $function): bool
+    {
+        if (!function_exists($function)) {
+            return true;
+        }
+        $disabled = array_filter(array_map('trim', explode(',', (string) ini_get('disable_functions'))));
+
+        return in_array($function, $disabled, true);
+    }
+}
+
 if (!function_exists('lh_schedule_booking_payment_reminder')) {
     /** Spawn a background process that sends the guest payment reminder after the configured delay. */
     function lh_schedule_booking_payment_reminder(int $bookingId): void
     {
-        if ($bookingId < 1 || PHP_OS_FAMILY === 'Windows' || !function_exists('exec')) {
+        if ($bookingId < 1 || PHP_OS_FAMILY === 'Windows' || lh_php_function_disabled('exec')) {
             return;
         }
 
