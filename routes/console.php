@@ -2,6 +2,7 @@
 
 use App\Console\Commands\ExpirePendingBookingsCommand;
 use App\Console\Commands\SendCheckinRemindersCommand;
+use App\Console\Commands\SendPaymentRemindersCommand;
 use App\Console\Commands\SyncIcalCommand;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -14,3 +15,4 @@ Artisan::command('inspire', function () {
 Schedule::command(SyncIcalCommand::class)->everyThirtyMinutes();
 Schedule::command(SendCheckinRemindersCommand::class)->everyThirtyMinutes();
 Schedule::command(ExpirePendingBookingsCommand::class)->everyFiveMinutes();
+Schedule::command(SendPaymentRemindersCommand::class)->everyFiveMinutes();

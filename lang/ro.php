@@ -121,4 +121,7 @@ return [
     'email.pending_deadline' => 'Ai la dispoziție :minutes minute. După acest termen, rezervarea se anulează automat dacă plata nu este completată.',
     'email.pending_expires_at' => 'Termen limită: :datetime',
     'email.pending_note' => 'Rezervarea va fi confirmată doar după plata cu succes. Vei primi un email separat de confirmare.',
+    'email.pending_reminder_subject' => 'Mai ai :minutes minute să finalizezi plata — Like Home',
+    'email.pending_reminder_intro' => 'Plata pentru rezervarea ta nu a fost încă finalizată.',
+    'email.pending_reminder_deadline' => 'Mai ai :minutes minute până când linkul de plată expiră și rezervarea se anulează automat.',
 ];

@@ -43,6 +43,35 @@ if (!function_exists('lh_booking_pending_ttl_minutes')) {
     }
 }
 
+if (!function_exists('lh_booking_payment_reminder_after_minutes')) {
+    /** Minutes after booking creation before sending the guest payment reminder email. */
+    function lh_booking_payment_reminder_after_minutes(): int
+    {
+        $after = max(1, (int) lh_env('MAIB_PAYMENT_REMINDER_AFTER_MINUTES', '15'));
+        $ttl = lh_booking_pending_ttl_minutes();
+
+        return min($after, max(1, $ttl - 1));
+    }
+}
+
+if (!function_exists('lh_bookings_has_column')) {
+    function lh_bookings_has_column(PDO $pdo, string $column): bool
+    {
+        static $cache = [];
+        if (array_key_exists($column, $cache)) {
+            return $cache[$column];
+        }
+        try {
+            $stmt = $pdo->query("SHOW COLUMNS FROM bookings LIKE " . $pdo->quote($column));
+            $cache[$column] = $stmt !== false && $stmt->fetch() !== false;
+        } catch (Throwable) {
+            $cache[$column] = false;
+        }
+
+        return $cache[$column];
+    }
+}
+
 if (!function_exists('lh_booking_payment_method_valid')) {
     function lh_booking_payment_method_valid(string $method): bool
     {

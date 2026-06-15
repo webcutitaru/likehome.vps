@@ -29,10 +29,12 @@ class Booking extends Model
         'payment_due_amount',
         'payment_amount',
         'maib_checkout_id',
+        'payment_checkout_url',
         'maib_payment_id',
         'maib_refund_id',
         'paid_at',
         'payment_expires_at',
+        'payment_reminder_sent_at',
         'refunded_amount',
         'checkin_reminder_sent_at',
     ];
@@ -51,6 +53,7 @@ class Booking extends Model
             'refunded_amount' => 'decimal:2',
             'paid_at' => 'datetime',
             'payment_expires_at' => 'datetime',
+            'payment_reminder_sent_at' => 'datetime',
             'checkin_reminder_sent_at' => 'datetime',
         ];
     }

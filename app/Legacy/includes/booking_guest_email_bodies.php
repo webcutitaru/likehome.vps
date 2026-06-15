@@ -89,7 +89,7 @@ if (!function_exists('lh_build_guest_booking_confirmation_body')) {
         $phones = lh_booking_guest_support_phones_block();
         $contactUrl = function_exists('lh_absolute_locale_url')
             ? lh_absolute_locale_url('contact.php', $locale)
-            : 'https://www.likehome.md/contact.php';
+            : 'https://likehome.md/contact';
 
         $lines = [];
         $lines[] = $t('email.confirm_greeting', ['name' => $first]);
@@ -121,7 +121,7 @@ if (!function_exists('lh_build_guest_booking_confirmation_body')) {
             }
             $siteUrl = function_exists('lh_public_site_origin')
                 ? lh_public_site_origin()
-                : 'https://www.likehome.md';
+                : 'https://likehome.md';
             $lines[] = $t('email.confirm_website') . ': ' . $siteUrl;
             $lines[] = $t('email.confirm_order_no') . ': LH-' . $bookingId;
             $currency = trim((string) ($ctx['currency'] ?? ''));
@@ -181,13 +181,15 @@ if (!function_exists('lh_build_guest_booking_pending_payment_body')) {
      *   locale?: string,
      *   coupon_code?: string,
      *   coupon_discount_amount?: float|int|string,
-     *   online_discount_amount?: float|int|string
+     *   online_discount_amount?: float|int|string,
+     *   is_reminder?: bool
      * } $ctx
      */
     function lh_build_guest_booking_pending_payment_body(array $ctx): string
     {
         $locale = (string) ($ctx['locale'] ?? lh_default_locale());
         $t = static fn (string $key, array $replace = []) => lh_translate($key, $replace, $locale);
+        $isReminder = !empty($ctx['is_reminder']);
 
         $guestName = (string) ($ctx['guest_name'] ?? '');
         $first = lh_booking_guest_first_name($guestName);
@@ -222,12 +224,14 @@ if (!function_exists('lh_build_guest_booking_pending_payment_body')) {
         $phones = lh_booking_guest_support_phones_block();
         $contactUrl = function_exists('lh_absolute_locale_url')
             ? lh_absolute_locale_url('contact.php', $locale)
-            : 'https://www.likehome.md/contact.php';
+            : 'https://likehome.md/contact';
 
         $lines = [];
         $lines[] = $t('email.confirm_greeting', ['name' => $first]);
         $lines[] = '';
-        $lines[] = $t('email.pending_intro');
+        $lines[] = $isReminder
+            ? $t('email.pending_reminder_intro')
+            : $t('email.pending_intro');
         $lines[] = '';
         $lines[] = $t('email.confirm_details');
         $lines[] = $t('email.confirm_property') . ': ' . $propertyTitle;
@@ -256,7 +260,9 @@ if (!function_exists('lh_build_guest_booking_pending_payment_body')) {
             $lines[] = $t('email.pending_link') . ': ' . $checkoutUrl;
         }
         $lines[] = '';
-        $lines[] = $t('email.pending_deadline', ['minutes' => (string) $ttlMinutes]);
+        $lines[] = $isReminder
+            ? $t('email.pending_reminder_deadline', ['minutes' => (string) $ttlMinutes])
+            : $t('email.pending_deadline', ['minutes' => (string) $ttlMinutes]);
         if ($expiresDisplay !== '') {
             $lines[] = $t('email.pending_expires_at', ['datetime' => $expiresDisplay]);
         }
@@ -306,7 +312,7 @@ if (!function_exists('lh_build_guest_checkin_reminder_body')) {
 
         $contactUrl = function_exists('lh_absolute_locale_url')
             ? lh_absolute_locale_url('contact.php', $locale)
-            : (function_exists('lh_absolute_url') ? lh_absolute_url('contact.php') : 'https://www.likehome.md/contact.php');
+            : (function_exists('lh_absolute_url') ? lh_absolute_url('contact.php') : 'https://likehome.md/contact');
 
         $b = [];
         $b[] = $t('email.reminder.greeting', ['name' => $first]);

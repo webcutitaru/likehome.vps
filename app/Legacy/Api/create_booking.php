@@ -379,8 +379,13 @@ function lh_api_create_booking(): array
                 $checkout_id = $checkout->checkoutId;
                 $checkout_url = $checkout->checkoutUrl;
 
-                $pdo->prepare('UPDATE bookings SET maib_checkout_id = ? WHERE id = ?')
-                    ->execute([$checkout_id, $booking_id]);
+                if (lh_bookings_has_column($pdo, 'payment_checkout_url')) {
+                    $pdo->prepare('UPDATE bookings SET maib_checkout_id = ?, payment_checkout_url = ? WHERE id = ?')
+                        ->execute([$checkout_id, $checkout_url, $booking_id]);
+                } else {
+                    $pdo->prepare('UPDATE bookings SET maib_checkout_id = ? WHERE id = ?')
+                        ->execute([$checkout_id, $booking_id]);
+                }
             } catch (Throwable $e) {
                 error_log('create_booking maib error: ' . $e->getMessage());
 

@@ -5,16 +5,16 @@ declare(strict_types=1);
 /**
  * SEO helpers: canonical base URL, meta text cleanup, current-request canonical fallback.
  *
- * Setează PUBLIC_SITE_URL în .env dacă difere de producție (implicit https://www.likehome.md).
+ * Setează PUBLIC_SITE_URL în .env dacă difere de producție (implicit https://likehome.md).
  */
 
 if (!function_exists('lh_public_site_origin')) {
     /**
-     * Canonical site origin without trailing slash (e.g. https://www.likehome.md).
+     * Canonical site origin without trailing slash (e.g. https://likehome.md).
      */
     function lh_public_site_origin(): string
     {
-        return rtrim(lh_env('PUBLIC_SITE_URL', 'https://www.likehome.md'), '/');
+        return rtrim(lh_env('PUBLIC_SITE_URL', 'https://likehome.md'), '/');
     }
 }
 

@@ -226,32 +226,6 @@ if (!function_exists('lh_booking_send_pending_payment_notifications')) {
         if (!empty($telegram_bot_token) && !empty($telegram_chat_id)) {
             send_telegram_notification($telegram_bot_token, $telegram_chat_id, $telegram_message);
         }
-
-        $guestBodyCtx = [
-            'guest_name' => $guest_name,
-            'property_title' => $property_title,
-            'check_in' => $check_in,
-            'check_out' => $check_out,
-            'guests' => $guests,
-            'total_price' => $total_price,
-            'booking_id' => $booking_id,
-            'locale' => $bookingLocale,
-            'checkout_url' => $checkoutUrl,
-            'payment_due_amount' => $payment_due,
-            'ttl_minutes' => $ttlMinutes,
-            'payment_expires_at' => $payment_expires_at,
-        ];
-        if ($coupon_discount_ins > 0.004 && $coupon_code_ins !== null && trim((string) $coupon_code_ins) !== '') {
-            $guestBodyCtx['coupon_code'] = (string) $coupon_code_ins;
-            $guestBodyCtx['coupon_discount_amount'] = $coupon_discount_ins;
-        }
-        if ((float) ($booking['online_discount_amount'] ?? 0) > 0.004) {
-            $guestBodyCtx['online_discount_amount'] = (float) $booking['online_discount_amount'];
-        }
-
-        $client_subject = lh_translate('email.pending_subject', [], $bookingLocale);
-        $client_message = lh_build_guest_booking_pending_payment_body($guestBodyCtx);
-        send_booking_notification($guest_email, $client_subject, $client_message, $admin_notification_email);
     }
 }
 
