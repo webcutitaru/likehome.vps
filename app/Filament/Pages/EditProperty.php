@@ -336,6 +336,7 @@ class EditProperty extends Page
                                         'propertyId' => $this->getPropertyIdForUpload(),
                                         'images' => $this->data['existing_images'] ?? [],
                                     ]),
+                                $this->propertyGalleryUploadScripts(),
                                 $this->makePropertyGalleryUpload()
                                     ->label('Încarcă imagini noi')
                                     ->disk('public')

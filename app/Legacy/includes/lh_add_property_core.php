@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 if (!defined('LH_ADD_PROPERTY_IMAGE_BATCH_MAX')) {
-    define('LH_ADD_PROPERTY_IMAGE_BATCH_MAX', 10);
+    define('LH_ADD_PROPERTY_IMAGE_BATCH_MAX', 100);
 }
 
 /**

@@ -232,6 +232,7 @@ class AddProperty extends Page
                             ->label('Galerie')
                             ->schema([
                                 View::make('filament.pages.partials.property-gallery-styles'),
+                                $this->propertyGalleryUploadScripts(),
                                 $this->makePropertyGalleryUpload()
                                     ->label('Imagini (trage pentru a reordona)')
                                     ->disk('public')

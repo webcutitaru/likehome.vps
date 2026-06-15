@@ -201,9 +201,9 @@ function lh_store_property_image(array $file, int $propertyId): ?string
         return null;
     }
 
-    $maxBytes = (int) lh_env('UPLOAD_MAX_IMAGE_BYTES', '5242880');
+    $maxBytes = (int) lh_env('UPLOAD_MAX_IMAGE_BYTES', '12582912');
     if ($maxBytes < 10240) {
-        $maxBytes = 5242880;
+        $maxBytes = 12582912;
     }
     if (($file['size'] ?? 0) > $maxBytes) {
         return null;
