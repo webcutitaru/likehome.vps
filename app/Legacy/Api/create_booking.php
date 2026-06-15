@@ -344,10 +344,15 @@ function lh_api_create_booking(): array
             ':notes' => 'Booking #' . $booking_id,
         ]);
 
+        $pdo->commit();
+
         $checkout_url = null;
         $checkout_id = null;
 
         if ($payment_method === 'online' && $hasPaymentCols) {
+            Illuminate\Support\Facades\DB::reconnect();
+            $pdo = getPDO();
+
             $property_title = $property['title'] ?? ('Property #' . $property_id);
             if (function_exists('lh_property_apply_locale')) {
                 $propertyLocalized = lh_property_apply_locale($property, $pdo, $bookingLocale);
@@ -393,12 +398,11 @@ function lh_api_create_booking(): array
                 }
             } catch (Throwable $e) {
                 error_log('create_booking maib error: ' . $e->getMessage());
+                lh_booking_fail_online_payment($pdo, $booking_id);
 
-                return lh_api_create_booking_fail_tx($pdo, 'api.payment_init_failed', 502);
+                return lh_api_create_booking_fail('api.payment_init_failed', 502);
             }
         }
-
-        $pdo->commit();
 
         if ($payment_method === 'on_site') {
             $stmtFresh = $pdo->prepare('SELECT * FROM bookings WHERE id = ? LIMIT 1');
@@ -457,7 +461,11 @@ function lh_api_create_booking(): array
         ];
     } catch (Throwable $e) {
         if (isset($pdo) && $pdo->inTransaction()) {
-            $pdo->rollBack();
+            try {
+                $pdo->rollBack();
+            } catch (Throwable $rollbackError) {
+                error_log('create_booking rollback failed: ' . $rollbackError->getMessage());
+            }
         }
         error_log('create_booking error: ' . $e->getMessage());
 
