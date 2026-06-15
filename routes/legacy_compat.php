@@ -31,6 +31,7 @@ Route::get('ical/export.php', static function (Request $request) {
 Route::get('cron/ical_sync.php', [LegacyCronController::class, 'icalSync']);
 Route::get('cron/checkin_reminder.php', [LegacyCronController::class, 'checkinReminder']);
 Route::get('cron/expire_pending_bookings.php', [LegacyCronController::class, 'expirePending']);
+Route::get('cron/payment_reminder.php', [LegacyCronController::class, 'paymentReminder']);
 
 Route::get('ajax/get_booked_dates.php', [BookedDatesController::class, 'index']);
 

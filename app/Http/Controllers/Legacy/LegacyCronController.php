@@ -42,6 +42,16 @@ final class LegacyCronController extends Controller
         return $this->plainResponse(Artisan::output());
     }
 
+    public function paymentReminder(Request $request): Response
+    {
+        $this->authorizeCron($request, 'MAIB_PENDING_CRON_SECRET');
+
+        LegacyBridge::boot();
+        Artisan::call('bookings:send-payment-reminders');
+
+        return $this->plainResponse(Artisan::output());
+    }
+
     private function authorizeCron(Request $request, string $envKey): void
     {
         LegacyBridge::boot();

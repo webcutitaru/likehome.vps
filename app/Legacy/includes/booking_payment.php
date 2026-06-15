@@ -54,6 +54,44 @@ if (!function_exists('lh_booking_payment_reminder_after_minutes')) {
     }
 }
 
+if (!function_exists('lh_booking_payment_expires_in_future')) {
+    function lh_booking_payment_expires_in_future(PDO $pdo, string $expiresAt): bool
+    {
+        $expiresAt = trim($expiresAt);
+        if ($expiresAt === '') {
+            return false;
+        }
+        try {
+            $stmt = $pdo->prepare('SELECT ? > NOW() AS ok');
+            $stmt->execute([$expiresAt]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return (bool) ($row['ok'] ?? false);
+        } catch (Throwable) {
+            return false;
+        }
+    }
+}
+
+if (!function_exists('lh_booking_payment_remaining_minutes')) {
+    function lh_booking_payment_remaining_minutes(PDO $pdo, string $expiresAt): int
+    {
+        $expiresAt = trim($expiresAt);
+        if ($expiresAt === '') {
+            return max(1, lh_booking_pending_ttl_minutes() - lh_booking_payment_reminder_after_minutes());
+        }
+        try {
+            $stmt = $pdo->prepare('SELECT GREATEST(1, CEIL(TIMESTAMPDIFF(MINUTE, NOW(), ?))) AS minutes');
+            $stmt->execute([$expiresAt]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return max(1, (int) ($row['minutes'] ?? 1));
+        } catch (Throwable) {
+            return max(1, lh_booking_pending_ttl_minutes() - lh_booking_payment_reminder_after_minutes());
+        }
+    }
+}
+
 if (!function_exists('lh_bookings_has_column')) {
     function lh_bookings_has_column(PDO $pdo, string $column): bool
     {

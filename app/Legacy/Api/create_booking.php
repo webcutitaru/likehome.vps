@@ -218,7 +218,11 @@ function lh_api_create_booking(): array
         $bookingStatus = $payment_method === 'online' ? 'pending' : 'confirmed';
         $paymentStatus = $payment_method === 'online' ? 'pending' : 'pay_at_property';
         $ttlMinutes = lh_booking_pending_ttl_minutes();
-        $expiresAt = (new DateTimeImmutable('now'))->modify('+' . $ttlMinutes . ' minutes')->format('Y-m-d H:i:s');
+        $expiresStmt = $pdo->query('SELECT DATE_ADD(NOW(), INTERVAL ' . (int) $ttlMinutes . ' MINUTE) AS expires_at');
+        $expiresAt = $expiresStmt ? (string) ($expiresStmt->fetch(PDO::FETCH_ASSOC)['expires_at'] ?? '') : '';
+        if ($expiresAt === '') {
+            $expiresAt = (new DateTimeImmutable('now'))->modify('+' . $ttlMinutes . ' minutes')->format('Y-m-d H:i:s');
+        }
 
         if ($hasPaymentCols) {
             $insertBooking = $pdo->prepare(
@@ -427,6 +431,9 @@ function lh_api_create_booking(): array
                 $checkout_url,
                 $ttlMinutes
             );
+
+            require_once dirname(__DIR__) . '/includes/payment_reminder_send.php';
+            lh_schedule_booking_payment_reminder($booking_id);
         }
 
         return [

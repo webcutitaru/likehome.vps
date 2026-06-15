@@ -84,15 +84,8 @@ function lh_payment_reminder_send_for_booking_row(PDO $pdo, array $row, array $o
     }
 
     $expiresRaw = trim((string) ($row['payment_expires_at'] ?? ''));
-    if ($expiresRaw !== '') {
-        try {
-            $expiresAt = new DateTimeImmutable($expiresRaw);
-            if ($expiresAt <= new DateTimeImmutable('now')) {
-                return ['result' => 'skipped', 'reason' => 'expired'];
-            }
-        } catch (Throwable) {
-            return ['result' => 'skipped', 'reason' => 'invalid_expires_at'];
-        }
+    if ($expiresRaw === '' || !lh_booking_payment_expires_in_future($pdo, $expiresRaw)) {
+        return ['result' => 'skipped', 'reason' => 'expired'];
     }
 
     $checkoutUrl = lh_booking_payment_checkout_url($pdo, $row);
@@ -114,7 +107,7 @@ function lh_payment_reminder_send_for_booking_row(PDO $pdo, array $row, array $o
         $propertyTitle = (string) ($property['title'] ?? $propertyTitle);
     }
 
-    $remainingMinutes = lh_booking_payment_reminder_remaining_minutes($row);
+    $remainingMinutes = lh_booking_payment_remaining_minutes($pdo, $expiresRaw);
     $guestBodyCtx = [
         'guest_name' => (string) ($row['guest_name'] ?? ''),
         'property_title' => $propertyTitle,
@@ -158,4 +151,35 @@ function lh_payment_reminder_send_for_booking_row(PDO $pdo, array $row, array $o
     }
 
     return ['result' => 'sent'];
+}
+
+if (!function_exists('lh_schedule_booking_payment_reminder')) {
+    /** Spawn a background process that sends the guest payment reminder after the configured delay. */
+    function lh_schedule_booking_payment_reminder(int $bookingId): void
+    {
+        if ($bookingId < 1 || PHP_OS_FAMILY === 'Windows' || !function_exists('exec')) {
+            return;
+        }
+
+        $delayMinutes = lh_booking_payment_reminder_after_minutes();
+        $php = defined('PHP_BINARY') && is_string(PHP_BINARY) && PHP_BINARY !== ''
+            ? PHP_BINARY
+            : 'php';
+        $artisan = function_exists('base_path')
+            ? base_path('artisan')
+            : dirname(__DIR__, 3) . '/artisan';
+        $logFile = function_exists('storage_path')
+            ? storage_path('logs/payment-reminder.log')
+            : dirname(__DIR__, 3) . '/storage/logs/payment-reminder.log';
+
+        $cmd = sprintf(
+            '(sleep %d && %s %s bookings:send-payment-reminder-for %d) >> %s 2>&1 &',
+            $delayMinutes * 60,
+            escapeshellarg($php),
+            escapeshellarg($artisan),
+            $bookingId,
+            escapeshellarg($logFile)
+        );
+        exec($cmd);
+    }
 }
