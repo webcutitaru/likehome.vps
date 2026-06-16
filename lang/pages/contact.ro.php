@@ -11,4 +11,8 @@ return [
     'location_hint' => 'Operăm proprietăți în zonă; adresele exacte și instrucțiunile de check-in le primești după confirmarea rezervării.',
     'response_label' => 'Timp de răspuns:',
     'response_body' => 'luni–vineri, în ordinea mesajelor primite. Pentru urgențe în timpul sejurului, menționează în subiect „Urgent” și numărul rezervării.',
+    'legal_label' => 'Date companie',
+    'legal_idno' => 'IDNO',
+    'legal_address' => 'Adresă juridică',
+    'legal_phones' => 'Telefon',
 ];

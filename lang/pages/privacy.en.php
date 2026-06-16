@@ -29,7 +29,7 @@ return [
         ],
         [
             'title' => '6. Recipients and transfers',
-            'body' => '<p>We may use hosting, email, and analytics / advertising providers. Some may be located outside the EEA; in such cases we ensure appropriate safeguards (standard contractual clauses, adequacy decisions, etc.) under applicable law.</p>',
+            'body' => '<p>We may use hosting, email, and analytics / advertising providers. Some may be located outside the EEA; in such cases we ensure appropriate safeguards (standard contractual clauses, adequacy decisions, etc.) under applicable law.</p><p>For <strong class="text-ink">online payment</strong>, payment processing is provided by <strong class="text-ink">maib</strong> (maib e-commerce). Card data (number, CVV/CVC, expiry date) is entered only on maib’s secure page; {company_name} <strong class="text-ink">does not collect, store, or process</strong> this data. For online payments we transmit to maib the information required for the transaction: amount, booking description, payer contact details, and order identifier.</p>',
         ],
         [
             'title' => '7. Retention period',

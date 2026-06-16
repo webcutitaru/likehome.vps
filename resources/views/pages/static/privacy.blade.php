@@ -26,8 +26,8 @@
       @endif
       @php
         $body = str_replace(
-            ['{email}', '{city}'],
-            [$contactEmail, $contactCity],
+            ['{email}', '{city}', '{company_name}'],
+            [$contactEmail, $contactCity, lh_company_legal_name()],
             (string) ($section['body'] ?? '')
         );
       @endphp

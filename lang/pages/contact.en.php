@@ -11,4 +11,8 @@ return [
     'location_hint' => 'We operate properties in the area; exact addresses and check-in instructions are sent after your booking is confirmed.',
     'response_label' => 'Response time:',
     'response_body' => 'Monday–Friday, in the order messages are received. For urgent issues during your stay, put “Urgent” and your booking number in the subject line.',
+    'legal_label' => 'Company details',
+    'legal_idno' => 'IDNO',
+    'legal_address' => 'Legal address',
+    'legal_phones' => 'Phone',
 ];

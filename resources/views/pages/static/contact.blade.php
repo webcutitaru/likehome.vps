@@ -28,6 +28,25 @@
     </div>
   </div>
 
+  <div class="mt-8 rounded-3xl border border-black/[0.08] bg-white p-8 shadow-sm shadow-black/[0.04]">
+    <div class="text-xs font-semibold uppercase tracking-widest text-blue-grey mb-4">{{ $sections['legal_label'] ?? '' }}</div>
+    <dl class="grid sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
+      <div>
+        <dt class="text-blue-grey text-xs uppercase tracking-wide mb-1">{{ $sections['legal_label'] ?? '' }}</dt>
+        <dd class="font-semibold text-ink">{{ lh_company_legal_name() }}</dd>
+        <dd class="text-blue-grey mt-1">{{ $sections['legal_idno'] ?? 'IDNO' }}: {{ lh_company_idno() }}</dd>
+      </div>
+      <div>
+        <dt class="text-blue-grey text-xs uppercase tracking-wide mb-1">{{ $sections['legal_address'] ?? '' }}</dt>
+        <dd class="font-medium text-ink">{{ lh_company_legal_address() }}</dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt class="text-blue-grey text-xs uppercase tracking-wide mb-1">{{ $sections['legal_phones'] ?? '' }}</dt>
+        <dd class="font-medium text-ink">{{ lh_company_contact_phones() }}</dd>
+      </div>
+    </dl>
+  </div>
+
   <div class="mt-10 rounded-2xl bg-black/[0.03] border border-black/[0.06] px-6 py-5 text-sm text-blue-grey text-center md:text-left">
     <span class="font-semibold text-ink">{{ $sections['response_label'] ?? '' }}</span> {{ $sections['response_body'] ?? '' }}
   </div>

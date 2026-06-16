@@ -29,7 +29,7 @@ return [
         ],
         [
             'title' => '6. Destinatari și transferuri',
-            'body' => '<p>Putem folosi furnizori de găzduire, email și servicii de analiză / publicitate. Unii pot avea sedii în afara SEE; în astfel de cazuri ne asigurăm că există garanții adecvate (clauze contractuale tip, decizii de adecvare etc.), conform legislației aplicabile.</p>',
+            'body' => '<p>Putem folosi furnizori de găzduire, email și servicii de analiză / publicitate. Unii pot avea sedii în afara SEE; în astfel de cazuri ne asigurăm că există garanții adecvate (clauze contractuale tip, decizii de adecvare etc.), conform legislației aplicabile.</p><p>La <strong class="text-ink">plata online</strong>, procesarea plăților este realizată de <strong class="text-ink">maib</strong> (serviciul maib e-commerce). Datele cardului (număr, CVV/CVC, dată expirare) sunt introduse exclusiv pe pagina securizată maib; {company_name} <strong class="text-ink">nu colectează, nu stochează și nu procesează</strong> aceste date. Pentru plăți online transmitem către maib informațiile necesare tranzacției: sumă, descrierea rezervării, date de contact ale plătitorului și identificatorul comenzii.</p>',
         ],
         [
             'title' => '7. Durata păstrării',
