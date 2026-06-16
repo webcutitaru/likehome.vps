@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\IcalExportController;
+use App\Http\Middleware\CanonicalHostRedirect;
 use App\Http\Middleware\LegacyRedirects;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ajax/maib_callback.php',
         ]);
         $middleware->web(prepend: [
+            CanonicalHostRedirect::class,
             LegacyRedirects::class,
         ]);
         $middleware->alias([
