@@ -21,11 +21,15 @@ Route::get('maib_check.php', MaibCheckController::class);
 
 Route::get('ical/export.php', static function (Request $request) {
     $token = trim((string) $request->query('token', ''));
+    if (str_ends_with(strtolower($token), '.ics')) {
+        $token = substr($token, 0, -4);
+    }
+    $token = trim($token);
     if ($token === '') {
         abort(404);
     }
 
-    return redirect('/ical/'.$token.'.ics', 301);
+    return redirect('/ical/'.rawurlencode($token).'.ics', 301);
 });
 
 Route::get('cron/ical_sync.php', [LegacyCronController::class, 'icalSync']);

@@ -96,4 +96,24 @@ class IcalExportTest extends TestCase
         $response->assertRedirect('/ical/'.$token.'.ics');
         $response->assertStatus(301);
     }
+
+    public function test_legacy_export_php_strips_ics_suffix_from_token_before_redirect(): void
+    {
+        $token = 'legacy-export-token-abc';
+
+        $response = $this->get('/ical/export.php?token='.$token.'.ics');
+
+        $response->assertRedirect('/ical/'.$token.'.ics');
+        $response->assertStatus(301);
+    }
+
+    public function test_double_ics_url_redirects_to_canonical_ics_url(): void
+    {
+        $token = 'legacy-export-token-abc';
+
+        $response = $this->get('/ical/'.$token.'.ics.ics');
+
+        $response->assertRedirect('/ical/'.$token.'.ics');
+        $response->assertStatus(301);
+    }
 }

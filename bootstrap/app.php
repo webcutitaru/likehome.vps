@@ -17,6 +17,17 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function (): void {
+            Route::get('/ical/{token}.ics.ics', static function (string $token) {
+                if (str_ends_with(strtolower($token), '.ics')) {
+                    $token = substr($token, 0, -4);
+                }
+                $token = trim($token);
+                if ($token === '') {
+                    abort(404);
+                }
+
+                return redirect('/ical/'.rawurlencode($token).'.ics', 301);
+            });
             Route::get('/ical/{token}.ics', [IcalExportController::class, 'show']);
             require __DIR__.'/../routes/legacy_compat.php';
         },
