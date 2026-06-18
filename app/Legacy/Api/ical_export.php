@@ -48,7 +48,7 @@ function lh_api_ical_export(string $token): array
         ];
     }
 
-    global $conn;
+    $conn = getConn();
 
     $stmt = mysqli_prepare(
         $conn,
