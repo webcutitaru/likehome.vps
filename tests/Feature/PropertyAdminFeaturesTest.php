@@ -80,4 +80,40 @@ class PropertyAdminFeaturesTest extends TestCase
         $response->assertSee('Creează proprietatea', false);
         $response->assertSee('reordona', false);
     }
+
+    public function test_property_save_preserves_gallery_when_only_ical_link_changes(): void
+    {
+        $property = Property::query()->create([
+            'title' => 'Gallery Preserve',
+            'lot_id' => 'GAL-1',
+            'slug' => 'gallery-preserve',
+            'price' => 800,
+            'location' => 'Chișinău',
+            'description' => 'Short',
+            'city' => 'Chișinău',
+            'district' => 'Centru',
+            'address' => 'Str. Test 1',
+            'description_long' => 'Long description',
+            'property_type' => 'Apartament',
+            'rooms' => 2,
+            'sleep_capacity' => 4,
+            'min_stay' => 1,
+            'amenities' => '[]',
+            'image_name' => 'alpha.webp,beta.webp',
+            'ical_import_link' => '',
+            'is_active' => true,
+        ]);
+
+        $service = app(PropertySaveService::class);
+        $formData = $service->loadFormData($property);
+        $formData['existing_images'] = ['alpha.webp', 'beta.webp'];
+        $formData['ical_import_link'] = 'https://example.com/calendar.ics';
+
+        $result = $service->save($property, $formData, []);
+
+        $this->assertTrue($result['ok'] ?? false, (string) ($result['error'] ?? 'save failed'));
+        $property->refresh();
+        $this->assertSame('alpha.webp,beta.webp', (string) $property->image_name);
+        $this->assertSame('https://example.com/calendar.ics', (string) $property->ical_import_link);
+    }
 }

@@ -65,6 +65,42 @@ function lh_legacy_bootstrap(): void
         }
     }
 
+    if (! function_exists('lh_legacy_refresh_db_connections')) {
+        /**
+         * Drop stale MySQL handles after long-running work (e.g. gallery batch upload).
+         */
+        function lh_legacy_refresh_db_connections(): void
+        {
+            global $conn;
+
+            if ($conn instanceof mysqli) {
+                @mysqli_close($conn);
+                $conn = null;
+            }
+
+            Illuminate\Support\Facades\DB::reconnect();
+
+            $waitSeconds = 600;
+            if (function_exists('config')) {
+                $waitSeconds = max(60, (int) config('likehome.gallery_save.db_wait_timeout_seconds', 600));
+            }
+
+            try {
+                $pdo = Illuminate\Support\Facades\DB::connection()->getPdo();
+                $pdo->exec('SET SESSION wait_timeout='.$waitSeconds);
+                $pdo->exec('SET SESSION interactive_timeout='.$waitSeconds);
+            } catch (\Throwable) {
+                // Best-effort; reconnect alone still helps.
+            }
+
+            $conn = App\Legacy\LegacyBridge::createMysqliConnection();
+            if ($conn instanceof mysqli) {
+                @mysqli_query($conn, 'SET SESSION wait_timeout='.$waitSeconds);
+                @mysqli_query($conn, 'SET SESSION interactive_timeout='.$waitSeconds);
+            }
+        }
+    }
+
     if (! function_exists('lh_public_url')) {
         function lh_public_url(string $path = ''): string
         {

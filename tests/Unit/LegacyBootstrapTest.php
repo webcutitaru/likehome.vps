@@ -6,6 +6,7 @@ namespace Tests\Unit;
 
 use App\Legacy\LegacyBridge;
 use App\Services\PropertySaveService;
+use App\Support\GallerySaveRuntime;
 use Tests\TestCase;
 
 class LegacyBootstrapTest extends TestCase
@@ -24,7 +25,12 @@ class LegacyBootstrapTest extends TestCase
         LegacyBridge::boot();
 
         $this->assertTrue(function_exists('lh_edit_property_save_from_post'));
+        $this->assertTrue(function_exists('lh_edit_property_validate_post'));
+        $this->assertTrue(function_exists('lh_legacy_refresh_db_connections'));
         $this->assertTrue(function_exists('lh_store_property_image'));
+
+        GallerySaveRuntime::begin();
+        $this->assertSame(10, GallerySaveRuntime::checkpointEvery());
     }
 
     public function test_csp_is_skipped_for_admin_and_livewire_paths(): void

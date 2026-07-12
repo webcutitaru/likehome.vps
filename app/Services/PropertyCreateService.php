@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Legacy\LegacyBridge;
 use App\Models\Property;
+use App\Support\GallerySaveRuntime;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -47,14 +48,33 @@ final class PropertyCreateService
             }
 
             $uploaded = [];
+            if ($newImages !== []) {
+                GallerySaveRuntime::begin();
+            }
+
+            $checkpointEvery = GallerySaveRuntime::checkpointEvery();
+            $sinceCheckpoint = 0;
+
             foreach ($newImages as $image) {
                 $stored = $this->saveService->storeUploadedImageForProperty($image, $propertyId);
-                if ($stored !== null) {
-                    $uploaded[] = $stored;
+                if ($stored === null) {
+                    continue;
+                }
+
+                $uploaded[] = $stored;
+                $sinceCheckpoint++;
+
+                if ($sinceCheckpoint >= $checkpointEvery) {
+                    GallerySaveRuntime::applyMySqlSessionTimeouts();
+                    DB::table('properties')
+                        ->where('id', $propertyId)
+                        ->update(['image_name' => implode(',', $uploaded)]);
+                    $sinceCheckpoint = 0;
                 }
             }
 
             if ($uploaded !== []) {
+                lh_legacy_refresh_db_connections();
                 DB::table('properties')
                     ->where('id', $propertyId)
                     ->update(['image_name' => implode(',', $uploaded)]);

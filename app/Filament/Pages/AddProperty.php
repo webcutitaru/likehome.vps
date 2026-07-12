@@ -8,6 +8,7 @@ use App\Filament\Concerns\ConfiguresPropertyGalleryUpload;
 use App\Filament\Navigation\AdminNavigationGroup;
 use App\Legacy\LegacyBridge;
 use App\Services\PropertyCreateService;
+use App\Support\GallerySaveRuntime;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
@@ -253,6 +254,9 @@ class AddProperty extends Page
             $data = $this->form->getState();
 
             $newImages = $data['new_images'] ?? [];
+            if (is_array($newImages) && $newImages !== []) {
+                GallerySaveRuntime::begin();
+            }
             unset($data['new_images']);
 
             $result = app(PropertyCreateService::class)->create(

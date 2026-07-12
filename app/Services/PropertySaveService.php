@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Legacy\LegacyBridge;
 use App\Models\Property;
+use App\Support\GallerySaveRuntime;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -29,15 +30,41 @@ final class PropertySaveService
         }
 
         $post = $this->toLegacyPost($formData);
+
+        $validationError = lh_edit_property_validate_post($post);
+        if ($validationError !== null) {
+            return ['ok' => false, 'error' => $validationError];
+        }
+
         $existingImages = $post['existing_images'] ?? [];
         if (! is_array($existingImages)) {
             $existingImages = [];
         }
 
+        if ($newImages !== []) {
+            GallerySaveRuntime::begin();
+        }
+
+        $checkpointEvery = GallerySaveRuntime::checkpointEvery();
+        $sinceCheckpoint = 0;
+
         foreach ($newImages as $image) {
             $stored = $this->storeGalleryImage($image, $propertyId);
-            if ($stored !== null) {
-                $existingImages[] = $stored;
+            if ($stored === null) {
+                continue;
+            }
+
+            $existingImages[] = $stored;
+            $sinceCheckpoint++;
+
+            if ($sinceCheckpoint >= $checkpointEvery) {
+                $existingImages = array_values(array_unique(array_filter(array_map(
+                    static fn ($name) => trim((string) $name),
+                    $existingImages
+                ))));
+                GallerySaveRuntime::applyMySqlSessionTimeouts();
+                $this->persistGalleryImageNames($propertyId, $existingImages);
+                $sinceCheckpoint = 0;
             }
         }
 
@@ -49,10 +76,10 @@ final class PropertySaveService
         $post['save_property'] = '1';
         $post['property_id'] = (string) $propertyId;
 
-        $conn = getConn();
-        $pdo = LegacyBridge::pdo();
+        lh_legacy_refresh_db_connections();
+        $this->persistGalleryImageNames($propertyId, $post['existing_images']);
 
-        $result = lh_edit_property_save_from_post($conn, $pdo, $propertyId, $post, []);
+        $result = lh_edit_property_save_from_post(getConn(), LegacyBridge::pdo(), $propertyId, $post, []);
 
         if (! ($result['ok'] ?? false)) {
             return $result;
@@ -252,6 +279,20 @@ final class PropertySaveService
         if (! is_dir($legacyDir) && ! mkdir($legacyDir, 0755, true) && ! is_dir($legacyDir)) {
             throw new RuntimeException('Cannot create legacy gallery directory.');
         }
+    }
+
+    /**
+     * @param  list<string>  $imageNames
+     */
+    private function persistGalleryImageNames(int $propertyId, array $imageNames): void
+    {
+        if ($imageNames === []) {
+            return;
+        }
+
+        DB::table('properties')
+            ->where('id', $propertyId)
+            ->update(['image_name' => implode(',', $imageNames)]);
     }
 
     private function mirrorToPublicUploads(int $propertyId, string $basename): void

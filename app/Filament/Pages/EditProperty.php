@@ -11,6 +11,7 @@ use App\Legacy\LegacyBridge;
 use App\Models\Property;
 use App\Services\PropertyDeleteService;
 use App\Services\PropertySaveService;
+use App\Support\GallerySaveRuntime;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
@@ -331,6 +332,9 @@ class EditProperty extends Page
                         Tab::make('gallery')
                             ->label('Galerie')
                             ->schema([
+                                Hidden::make('existing_images')
+                                    ->dehydrated(true)
+                                    ->default([]),
                                 View::make('filament.pages.property-gallery-dnd')
                                     ->viewData(fn (): array => [
                                         'propertyId' => $this->getPropertyIdForUpload(),
@@ -356,9 +360,17 @@ class EditProperty extends Page
             $data = $this->form->getState();
 
             $newImages = $data['new_images'] ?? [];
+            if (is_array($newImages) && $newImages !== []) {
+                GallerySaveRuntime::begin();
+            }
+
             unset($data['new_images'], $data['ical_export_url']);
 
-            $data['existing_images'] = $this->normalizeExistingImagesForSave($data['existing_images'] ?? []);
+            $data['existing_images'] = $this->normalizeExistingImagesForSave(
+                is_array($this->data['existing_images'] ?? null)
+                    ? $this->data['existing_images']
+                    : ($data['existing_images'] ?? [])
+            );
 
             $originalBlockIds = collect(app(PropertySaveService::class)->loadFormData($this->getProperty())['manual_blocks'] ?? [])
                 ->pluck('id')

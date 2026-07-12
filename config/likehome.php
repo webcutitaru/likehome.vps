@@ -5,6 +5,12 @@ return [
     'default_locale' => env('APP_DEFAULT_LOCALE', 'ro'),
     'locales' => array_filter(array_map('trim', explode(',', env('APP_LOCALES', 'ro,en,ru')))),
     'site_url' => env('PUBLIC_SITE_URL', env('APP_URL', 'http://localhost')),
+    'gallery_save' => [
+        'max_execution_seconds' => (int) env('GALLERY_SAVE_MAX_EXECUTION_SECONDS', 900),
+        'memory_limit' => env('GALLERY_SAVE_MEMORY_LIMIT', '512M'),
+        'db_wait_timeout_seconds' => (int) env('GALLERY_SAVE_DB_WAIT_TIMEOUT', 600),
+        'checkpoint_every' => (int) env('GALLERY_SAVE_CHECKPOINT_EVERY', 10),
+    ],
     'env' => [
         'APP_ENV' => env('APP_ENV', 'local'),
         'APP_DEBUG' => env('APP_DEBUG', 'true'),

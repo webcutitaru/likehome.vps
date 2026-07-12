@@ -22,6 +22,26 @@ function lh_edit_property_save_timing_tick(float &$marker, array &$timings, stri
 }
 
 /**
+ * Validate admin edit POST (pricing / stay discounts) before slow side effects (gallery disk writes).
+ *
+ * @param array<string, mixed> $post
+ */
+function lh_edit_property_validate_post(array $post): ?string
+{
+    $parsedPeriodsPost = lh_pricing_periods_from_post($post);
+    if ($parsedPeriodsPost['error'] !== null) {
+        return (string) $parsedPeriodsPost['error'];
+    }
+
+    $parsedGlobalSd = lh_stay_discount_global_rules_from_post($post);
+    if ($parsedGlobalSd['error'] !== null) {
+        return (string) $parsedGlobalSd['error'];
+    }
+
+    return null;
+}
+
+/**
  * Apply full property update from admin edit form (optionally merges new multi-file uploads).
  *
  * @param array<string, mixed> $post
@@ -38,14 +58,13 @@ function lh_edit_property_save_from_post(mysqli $conn, PDO $pdo, int $id, array 
     $timeMark = microtime(true);
     $timings = [];
 
+    $validationError = lh_edit_property_validate_post($post);
+    if ($validationError !== null) {
+        return ['ok' => false, 'error' => $validationError];
+    }
+
     $parsedPeriodsPost = lh_pricing_periods_from_post($post);
-    if ($parsedPeriodsPost['error'] !== null) {
-        return ['ok' => false, 'error' => (string) $parsedPeriodsPost['error']];
-    }
     $parsedGlobalSd = lh_stay_discount_global_rules_from_post($post);
-    if ($parsedGlobalSd['error'] !== null) {
-        return ['ok' => false, 'error' => (string) $parsedGlobalSd['error']];
-    }
 
     if ($dbgTime) {
         lh_edit_property_save_timing_tick($timeMark, $timings, 'parse_post_ms');
@@ -183,6 +202,11 @@ function lh_edit_property_save_from_post(mysqli $conn, PDO $pdo, int $id, array 
 
     $updDetails = ['title' => $title_raw, 'lot_id' => trim((string) ($post['lot_id'] ?? ''))];
     if (!empty(trim((string) ($post['ical_import_link'] ?? '')))) {
+        if (function_exists('lh_legacy_refresh_db_connections')) {
+            lh_legacy_refresh_db_connections();
+            $conn = getConn();
+            $pdo = getPDO();
+        }
         $icalResult = importPropertyIcal($id);
         lh_ical_set_import_feedback($icalResult);
         $updDetails['ical_import_success'] = !empty($icalResult['success']);
@@ -200,6 +224,12 @@ function lh_edit_property_save_from_post(mysqli $conn, PDO $pdo, int $id, array 
     }
 
     lh_admin_log_activity($conn, 'property_update', 'property', $id, $updDetails);
+
+    if (function_exists('lh_legacy_refresh_db_connections')) {
+        lh_legacy_refresh_db_connections();
+        $conn = getConn();
+        $pdo = getPDO();
+    }
 
     $trErr = lh_property_translations_save_from_post($pdo, $id, $post);
     if ($trErr !== null) {
